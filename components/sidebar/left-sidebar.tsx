@@ -99,12 +99,15 @@ export function LeftSidebar() {
               >
                 <MessageSquare className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                 <span className="flex-1 truncate">{chat.title}</span>
-                <button
+                <div
+                  role="button"
+                  tabIndex={0}
                   onClick={(e) => handleDeleteChat(e, chat.id)}
-                  className="hidden shrink-0 rounded p-0.5 text-muted-foreground hover:text-destructive group-hover:block"
+                  onKeyDown={(e) => { if (e.key === "Enter") handleDeleteChat(e as unknown as React.MouseEvent, chat.id); }}
+                  className="hidden shrink-0 rounded p-0.5 text-muted-foreground hover:text-destructive group-hover:block cursor-pointer"
                 >
                   <Trash2 className="h-3 w-3" />
-                </button>
+                </div>
               </button>
             ))
           )}
