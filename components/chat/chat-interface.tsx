@@ -30,7 +30,7 @@ export function ChatInterface() {
     stop,
     setMessages,
   } = useChat({
-    id: activeChatId ?? "new",
+    id: "chat",
     transport: new DefaultChatTransport({
       api: "/api/chat",
       body: {
