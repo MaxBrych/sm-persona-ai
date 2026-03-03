@@ -3,15 +3,19 @@
 import { useRef, useEffect } from "react";
 import type { UIMessage } from "ai";
 import { MessageItem } from "./message-item";
+import { PersonaGrid } from "./persona-grid";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Loader2 } from "lucide-react";
+import type { Persona } from "@/lib/types";
 
 export function MessageList({
   messages,
   status,
+  personas,
 }: {
   messages: UIMessage[];
   status: string;
+  personas: Persona[];
 }) {
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -25,12 +29,15 @@ export function MessageList({
   if (messages.length === 0) {
     return (
       <div className="flex h-full items-center justify-center px-8">
-        <div className="max-w-md text-center">
-          <h2 className="text-lg font-semibold mb-2">Persona AI Chat</h2>
-          <p className="text-sm text-muted-foreground">
-            Wähle Personas im rechten Panel aus und stelle Fragen zu
-            Produktentscheidungen, Zielgruppenanalysen oder Content-Strategien.
-          </p>
+        <div className="text-center space-y-6">
+          <div>
+            <h2 className="text-2xl font-serif font-bold mb-2">Persona AI</h2>
+            <p className="text-sm text-muted-foreground max-w-md mx-auto">
+              Wähle Personas aus und stelle Fragen zu
+              Produktentscheidungen, Zielgruppenanalysen oder Content-Strategien.
+            </p>
+          </div>
+          {personas.length > 0 && <PersonaGrid personas={personas} />}
         </div>
       </div>
     );

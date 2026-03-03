@@ -48,6 +48,7 @@ export interface Persona {
   name: string;
   type: string;
   category: string;
+  image_url?: string;
   data: PersonaData;
   created_at: string;
   updated_at: string;

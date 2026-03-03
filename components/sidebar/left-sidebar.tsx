@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus, MessageSquare, Trash2 } from "lucide-react";
+import { Plus, MessageSquare, Trash2, PanelLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useChats } from "@/hooks/use-chats";
@@ -9,8 +9,8 @@ import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function LeftSidebar() {
-  const { chats, loading, deleteChat, fetchChats } = useChats();
-  const { activeChatId, setActiveChatId, selectedModel, selectedPersonaIds } =
+  const { chats, loading, deleteChat } = useChats();
+  const { activeChatId, setActiveChatId, leftSidebarOpen, toggleLeftSidebar } =
     useAppStore();
 
   const handleNewChat = () => {
@@ -25,16 +25,47 @@ export function LeftSidebar() {
     }
   };
 
-  // Refresh chat list periodically to pick up new chats created by chat-interface
-  // This is a simple approach; could use Supabase realtime for better UX
   const handleChatClick = (chatId: string) => {
     setActiveChatId(chatId);
   };
 
+  if (!leftSidebarOpen) {
+    return (
+      <div className="flex h-full flex-col items-center py-2 gap-1">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 shrink-0"
+          onClick={toggleLeftSidebar}
+        >
+          <PanelLeft className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8"
+          onClick={handleNewChat}
+        >
+          <Plus className="h-4 w-4" />
+        </Button>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col min-w-[256px]">
       <div className="flex h-12 shrink-0 items-center justify-between border-b px-3">
-        <span className="text-sm font-semibold">Chats</span>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7"
+            onClick={toggleLeftSidebar}
+          >
+            <PanelLeft className="h-4 w-4" />
+          </Button>
+          <span className="text-sm font-semibold">Chats</span>
+        </div>
         <Button
           variant="ghost"
           size="icon"

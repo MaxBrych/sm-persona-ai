@@ -1,15 +1,19 @@
 import type { PersonaData } from "./types";
 
+const IMG = "https://tepsrntcystsvvtraruc.supabase.co/storage/v1/object/public/images";
+
 export const SEED_PERSONAS: {
   name: string;
   type: string;
   category: string;
+  image_url: string;
   data: PersonaData;
 }[] = [
   {
     name: "Niklas",
     type: "Neokultureller",
     category: "Digital-stark & einordnungsaffin",
+    image_url: `${IMG}/Niklas.png`,
     data: {
       kurzprofil: {
         alter: 43,
@@ -87,6 +91,7 @@ export const SEED_PERSONAS: {
     name: "Arne",
     type: "Ambitionierter",
     category: "Digital-stark & einordnungsaffin",
+    image_url: `${IMG}/Arne.png`,
     data: {
       kurzprofil: {
         alter: 38,
@@ -170,6 +175,7 @@ export const SEED_PERSONAS: {
     name: "Steffi",
     type: "Selbstgenügsame",
     category: "Selten, aber gezielt",
+    image_url: `${IMG}/Steffi.png`,
     data: {
       kurzprofil: {
         alter: 40,
@@ -245,6 +251,7 @@ export const SEED_PERSONAS: {
     name: "Vanessa",
     type: "Vereinfachende",
     category: "Selten, aber gezielt",
+    image_url: `${IMG}/Vanessa.png`,
     data: {
       kurzprofil: {
         alter: 32,
@@ -331,6 +338,7 @@ export const SEED_PERSONAS: {
     name: "Sabine",
     type: "Sicherheitsorientierte",
     category: "Selten, aber gezielt",
+    image_url: `${IMG}/Sabine.png`,
     data: {
       kurzprofil: {
         alter: 53,
@@ -406,6 +414,7 @@ export const SEED_PERSONAS: {
     name: "Theodor-Konstantin",
     type: "Traditionsbewusst",
     category: "Linear-nah & ruhig",
+    image_url: `${IMG}/Theodor-Konstantin.png`,
     data: {
       kurzprofil: {
         alter: 65,
@@ -471,6 +480,7 @@ export const SEED_PERSONAS: {
     name: "Vera",
     type: "Verantwortungsvolle",
     category: "Linear-nah & ruhig",
+    image_url: `${IMG}/Vera.png`,
     data: {
       kurzprofil: {
         alter: 61,

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { Check, ChevronsUpDown, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -92,6 +93,21 @@ export function PersonaSelector({ personas }: { personas: Persona[] }) {
                       >
                         {isSelected && <Check className="h-3 w-3" />}
                       </div>
+                      {persona.image_url ? (
+                        <div className="relative h-5 w-5 shrink-0 overflow-hidden rounded-full">
+                          <Image
+                            src={persona.image_url}
+                            alt={persona.name}
+                            fill
+                            className="object-cover"
+                            sizes="20px"
+                          />
+                        </div>
+                      ) : (
+                        <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-muted text-[10px] font-medium">
+                          {persona.name[0]}
+                        </div>
+                      )}
                       <div className="flex-1 text-left">
                         <span className="text-sm">{persona.name}</span>
                         <span className="ml-1.5 text-[10px] text-muted-foreground">

@@ -43,6 +43,7 @@ export function RightSidebar() {
     name: string;
     type: string;
     category: string;
+    image_url?: string;
     data: PersonaData;
   }) => {
     try {

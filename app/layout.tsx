@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
-import { Ubuntu, Merriweather } from "next/font/google";
+import { Ubuntu_Sans, Merriweather } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
-const fontSans = Ubuntu({
+const fontSans = Ubuntu_Sans({
   subsets: ["latin"],
   variable: "--font-sans",
-  weight: ["300", "400", "500", "700"],
 });
 
 const fontSerif = Merriweather({

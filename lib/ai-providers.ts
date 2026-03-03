@@ -12,14 +12,14 @@ export const registry = createProviderRegistry({
 
 export const AVAILABLE_MODELS: AIModel[] = [
   {
-    id: "anthropic:claude-sonnet-4-5-20250514",
+    id: "anthropic:claude-sonnet-4-5-20250929",
     name: "Claude Sonnet 4.5",
     provider: "anthropic",
     supportsImages: true,
     supportsReasoning: true,
   },
   {
-    id: "anthropic:claude-haiku-4-5-20250514",
+    id: "anthropic:claude-haiku-4-5-20251001",
     name: "Claude Haiku 4.5",
     provider: "anthropic",
     supportsImages: true,
@@ -48,7 +48,7 @@ export const AVAILABLE_MODELS: AIModel[] = [
   },
 ];
 
-export const DEFAULT_MODEL = "anthropic:claude-sonnet-4-5-20250514";
+export const DEFAULT_MODEL = "anthropic:claude-sonnet-4-5-20250929";
 
 export function getModelInfo(modelId: string): AIModel | undefined {
   return AVAILABLE_MODELS.find((m) => m.id === modelId);

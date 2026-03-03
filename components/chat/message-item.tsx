@@ -1,7 +1,6 @@
 "use client";
 
 import type { UIMessage } from "ai";
-import { Bot, User } from "lucide-react";
 import { MarkdownRenderer } from "./markdown-renderer";
 import { ThinkingIndicator } from "./thinking-indicator";
 import { cn } from "@/lib/utils";
@@ -18,44 +17,32 @@ export function MessageItem({
   return (
     <div
       className={cn(
-        "flex gap-3 px-4 py-3",
-        isUser ? "flex-row-reverse" : "flex-row"
+        "px-4 py-3",
+        isUser ? "flex justify-end" : ""
       )}
     >
       <div
         className={cn(
-          "flex h-7 w-7 shrink-0 items-center justify-center rounded-full",
-          isUser ? "bg-primary text-primary-foreground" : "bg-muted"
-        )}
-      >
-        {isUser ? <User className="h-3.5 w-3.5" /> : <Bot className="h-3.5 w-3.5" />}
-      </div>
-
-      <div
-        className={cn(
-          "max-w-[80%] space-y-1",
-          isUser ? "text-right" : "text-left"
+          isUser ? "max-w-[80%]" : "max-w-none"
         )}
       >
         {message.parts.map((part, index) => {
           switch (part.type) {
             case "text":
               if (!part.text) return null;
-              return (
-                <div
-                  key={index}
-                  className={cn(
-                    "inline-block rounded-lg px-3.5 py-2.5 text-sm leading-relaxed",
-                    isUser
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted text-foreground"
-                  )}
-                >
-                  {isUser ? (
+              if (isUser) {
+                return (
+                  <div
+                    key={index}
+                    className="inline-block rounded-2xl bg-primary text-primary-foreground px-4 py-2.5 text-sm font-sans leading-relaxed"
+                  >
                     <p className="whitespace-pre-wrap">{part.text}</p>
-                  ) : (
-                    <MarkdownRenderer content={part.text} />
-                  )}
+                  </div>
+                );
+              }
+              return (
+                <div key={index} className="font-serif text-[15px] leading-relaxed">
+                  <MarkdownRenderer content={part.text} />
                 </div>
               );
             case "reasoning":

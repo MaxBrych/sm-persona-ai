@@ -57,12 +57,14 @@ export function PersonaForm({
     name: string;
     type: string;
     category: string;
+    image_url?: string;
     data: PersonaData;
   }) => Promise<void>;
 }) {
   const [name, setName] = useState(persona?.name || "");
   const [type, setType] = useState(persona?.type || "");
   const [category, setCategory] = useState(persona?.category || "");
+  const [imageUrl, setImageUrl] = useState(persona?.image_url || "");
   const [data, setData] = useState<PersonaData>(
     persona?.data || { ...EMPTY_DATA }
   );
@@ -87,7 +89,7 @@ export function PersonaForm({
   const handleSubmit = async () => {
     setSaving(true);
     try {
-      await onSave({ name, type, category, data });
+      await onSave({ name, type, category, image_url: imageUrl || undefined, data });
       onOpenChange(false);
     } finally {
       setSaving(false);
@@ -148,6 +150,22 @@ export function PersonaForm({
                   placeholder="z.B. Digital-stark & einordnungsaffin"
                   className="h-8 text-sm"
                 />
+              </div>
+              <div>
+                <Label className="text-xs">Bild-URL</Label>
+                <Input
+                  value={imageUrl}
+                  onChange={(e) => setImageUrl(e.target.value)}
+                  placeholder="https://..."
+                  className="h-8 text-sm"
+                />
+                {imageUrl && (
+                  <img
+                    src={imageUrl}
+                    alt="Vorschau"
+                    className="mt-2 h-16 w-16 rounded-full object-cover"
+                  />
+                )}
               </div>
               <Separator />
               <div className="grid grid-cols-2 gap-3">

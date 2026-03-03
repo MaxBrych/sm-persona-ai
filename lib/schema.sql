@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS personas (
   name TEXT NOT NULL,
   type TEXT NOT NULL,
   category TEXT NOT NULL,
+  image_url TEXT,
   data JSONB NOT NULL DEFAULT '{}',
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -16,7 +17,7 @@ CREATE TABLE IF NOT EXISTS personas (
 CREATE TABLE IF NOT EXISTS chats (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   title TEXT NOT NULL DEFAULT 'Neuer Chat',
-  model TEXT NOT NULL DEFAULT 'anthropic:claude-sonnet-4-5-20250514',
+  model TEXT NOT NULL DEFAULT 'anthropic:claude-sonnet-4-5-20250929',
   persona_ids TEXT[] NOT NULL DEFAULT '{}',
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()

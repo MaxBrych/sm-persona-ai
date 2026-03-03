@@ -4,13 +4,19 @@ import { useAppStore } from "@/hooks/use-app-store";
 import { LeftSidebar } from "./sidebar/left-sidebar";
 import { ChatInterface } from "./chat/chat-interface";
 import { RightSidebar } from "./sidebar/right-sidebar";
+import { cn } from "@/lib/utils";
 
 export function LayoutShell() {
-  const { rightSidebarOpen } = useAppStore();
+  const { leftSidebarOpen, rightSidebarOpen } = useAppStore();
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
-      <aside className="w-64 shrink-0 border-r border-border bg-sidebar flex flex-col">
+      <aside
+        className={cn(
+          "shrink-0 border-r border-border bg-sidebar flex flex-col overflow-hidden transition-all duration-300 ease-in-out",
+          leftSidebarOpen ? "w-64" : "w-12"
+        )}
+      >
         <LeftSidebar />
       </aside>
 
@@ -18,11 +24,14 @@ export function LayoutShell() {
         <ChatInterface />
       </main>
 
-      {rightSidebarOpen && (
-        <aside className="w-80 shrink-0 border-l border-border bg-sidebar flex flex-col overflow-hidden">
-          <RightSidebar />
-        </aside>
-      )}
+      <aside
+        className={cn(
+          "shrink-0 border-l border-border bg-sidebar flex flex-col overflow-hidden transition-all duration-300 ease-in-out",
+          rightSidebarOpen ? "w-80" : "w-0 border-l-0"
+        )}
+      >
+        <RightSidebar />
+      </aside>
     </div>
   );
 }

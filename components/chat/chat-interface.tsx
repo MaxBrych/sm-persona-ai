@@ -4,6 +4,7 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { useEffect, useCallback, useRef } from "react";
 import { useAppStore } from "@/hooks/use-app-store";
+import { usePersonas } from "@/hooks/use-personas";
 import { supabase } from "@/lib/supabase/client";
 import { MessageList } from "./message-list";
 import { ChatInput } from "./chat-input";
@@ -12,6 +13,7 @@ import { ChatHeader } from "./chat-header";
 export function ChatInterface() {
   const { activeChatId, selectedPersonaIds, selectedModel, setActiveChatId } =
     useAppStore();
+  const { personas } = usePersonas();
 
   // Use refs so transport body always has latest values
   const modelRef = useRef(selectedModel);
@@ -138,7 +140,7 @@ export function ChatInterface() {
     <div className="flex h-full flex-col">
       <ChatHeader />
       <div className="flex-1 overflow-hidden">
-        <MessageList messages={messages} status={status} />
+        <MessageList messages={messages} status={status} personas={personas} />
       </div>
       <ChatInput onSend={handleSend} status={status} onStop={stop} />
     </div>

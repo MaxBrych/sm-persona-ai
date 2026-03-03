@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { ChevronDown, Pencil, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -43,9 +44,26 @@ export function PersonaCard({
   return (
     <div className="rounded-lg border bg-card/80 p-3 text-sm">
       <div className="flex items-start justify-between">
-        <div>
-          <h4 className="font-semibold leading-tight">{persona.name}</h4>
-          <p className="text-xs text-muted-foreground">{persona.type}</p>
+        <div className="flex items-center gap-2.5">
+          {persona.image_url ? (
+            <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full">
+              <Image
+                src={persona.image_url}
+                alt={persona.name}
+                fill
+                className="object-cover"
+                sizes="40px"
+              />
+            </div>
+          ) : (
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-semibold">
+              {persona.name[0]}
+            </div>
+          )}
+          <div>
+            <h4 className="font-semibold leading-tight">{persona.name}</h4>
+            <p className="text-xs text-muted-foreground">{persona.type}</p>
+          </div>
         </div>
         <div className="flex items-center gap-1">
           {onEdit && (
