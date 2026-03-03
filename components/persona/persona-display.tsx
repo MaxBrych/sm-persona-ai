@@ -9,11 +9,13 @@ export function PersonaDisplay({
   selectedIds,
   onEdit,
   onDelete,
+  onViewProfile,
 }: {
   personas: Persona[];
   selectedIds: string[];
   onEdit?: (persona: Persona) => void;
   onDelete?: (id: string) => void;
+  onViewProfile?: (persona: Persona) => void;
 }) {
   const selectedPersonas = personas.filter((p) => selectedIds.includes(p.id));
 
@@ -37,6 +39,7 @@ export function PersonaDisplay({
             persona={persona}
             onEdit={onEdit ? () => onEdit(persona) : undefined}
             onDelete={onDelete ? () => onDelete(persona.id) : undefined}
+            onViewProfile={onViewProfile ? () => onViewProfile(persona) : undefined}
           />
         ))}
       </div>
