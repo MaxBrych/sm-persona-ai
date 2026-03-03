@@ -1,0 +1,95 @@
+"use client";
+
+import { Plus, MessageSquare, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useChats } from "@/hooks/use-chats";
+import { useAppStore } from "@/hooks/use-app-store";
+import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
+
+export function LeftSidebar() {
+  const { chats, loading, deleteChat, fetchChats } = useChats();
+  const { activeChatId, setActiveChatId, selectedModel, selectedPersonaIds } =
+    useAppStore();
+
+  const handleNewChat = () => {
+    setActiveChatId(null);
+  };
+
+  const handleDeleteChat = async (e: React.MouseEvent, chatId: string) => {
+    e.stopPropagation();
+    await deleteChat(chatId);
+    if (activeChatId === chatId) {
+      setActiveChatId(null);
+    }
+  };
+
+  // Refresh chat list periodically to pick up new chats created by chat-interface
+  // This is a simple approach; could use Supabase realtime for better UX
+  const handleChatClick = (chatId: string) => {
+    setActiveChatId(chatId);
+  };
+
+  return (
+    <div className="flex h-full flex-col">
+      <div className="flex h-12 shrink-0 items-center justify-between border-b px-3">
+        <span className="text-sm font-semibold">Chats</span>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-7 w-7"
+          onClick={handleNewChat}
+        >
+          <Plus className="h-4 w-4" />
+        </Button>
+      </div>
+
+      <ScrollArea className="flex-1">
+        <div className="p-2 space-y-0.5">
+          {loading ? (
+            Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} className="h-10 w-full rounded" />
+            ))
+          ) : chats.length === 0 ? (
+            <div className="px-3 py-8 text-center text-xs text-muted-foreground">
+              Noch keine Chats. Starte eine neue Konversation.
+            </div>
+          ) : (
+            chats.map((chat) => (
+              <button
+                key={chat.id}
+                onClick={() => handleChatClick(chat.id)}
+                className={cn(
+                  "group flex w-full items-center gap-2 rounded px-2.5 py-2 text-left text-sm transition-colors hover:bg-sidebar-accent",
+                  activeChatId === chat.id &&
+                    "bg-sidebar-accent text-sidebar-accent-foreground"
+                )}
+              >
+                <MessageSquare className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                <span className="flex-1 truncate">{chat.title}</span>
+                <button
+                  onClick={(e) => handleDeleteChat(e, chat.id)}
+                  className="hidden shrink-0 rounded p-0.5 text-muted-foreground hover:text-destructive group-hover:block"
+                >
+                  <Trash2 className="h-3 w-3" />
+                </button>
+              </button>
+            ))
+          )}
+        </div>
+      </ScrollArea>
+
+      <div className="border-t p-3">
+        <Button
+          onClick={handleNewChat}
+          className="w-full justify-start gap-2 text-xs"
+          size="sm"
+        >
+          <Plus className="h-3.5 w-3.5" />
+          Neuer Chat
+        </Button>
+      </div>
+    </div>
+  );
+}
