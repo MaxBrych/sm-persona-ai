@@ -27,7 +27,7 @@ export function LayoutShell() {
       <aside
         className={cn(
           "shrink-0 border-l border-border bg-sidebar flex flex-col overflow-hidden transition-all duration-300 ease-in-out",
-          rightSidebarOpen ? "w-80" : "w-0 border-l-0"
+          rightSidebarOpen ? "w-80" : "w-12"
         )}
       >
         <RightSidebar />

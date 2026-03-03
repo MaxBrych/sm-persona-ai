@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, PanelRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { PersonaSelector } from "@/components/persona/persona-selector";
@@ -16,7 +16,7 @@ import type { Persona, PersonaData } from "@/lib/types";
 export function RightSidebar() {
   const { personas, loading, createPersona, updatePersona, deletePersona } =
     usePersonas();
-  const { selectedPersonaIds } = useAppStore();
+  const { selectedPersonaIds, rightSidebarOpen, toggleRightSidebar } = useAppStore();
   const [formOpen, setFormOpen] = useState(false);
   const [editingPersona, setEditingPersona] = useState<Persona | undefined>();
 
@@ -59,10 +59,35 @@ export function RightSidebar() {
     }
   };
 
+  if (!rightSidebarOpen) {
+    return (
+      <div className="flex h-full flex-col items-center py-2 gap-1">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 shrink-0"
+          onClick={toggleRightSidebar}
+        >
+          <PanelRight className="h-4 w-4" />
+        </Button>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col min-w-[320px]">
       <div className="flex h-12 shrink-0 items-center justify-between border-b px-3">
-        <span className="text-sm font-semibold">Personas</span>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7"
+            onClick={toggleRightSidebar}
+          >
+            <PanelRight className="h-4 w-4" />
+          </Button>
+          <span className="text-sm font-semibold">Personas</span>
+        </div>
         <Button
           variant="ghost"
           size="icon"

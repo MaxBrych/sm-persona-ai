@@ -6,6 +6,7 @@ import { MessageItem } from "./message-item";
 import { PersonaGrid } from "./persona-grid";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Loader2 } from "lucide-react";
+import { useAppStore } from "@/hooks/use-app-store";
 import type { Persona } from "@/lib/types";
 
 export function MessageList({
@@ -17,6 +18,7 @@ export function MessageList({
   status: string;
   personas: Persona[];
 }) {
+  const { selectedPersonaIds } = useAppStore();
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -50,6 +52,8 @@ export function MessageList({
           <MessageItem
             key={message.id}
             message={message}
+            personas={personas}
+            selectedPersonaIds={selectedPersonaIds}
             isStreaming={
               isStreaming && index === messages.length - 1 && message.role === "assistant"
             }

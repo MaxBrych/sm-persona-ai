@@ -77,10 +77,13 @@ export function PersonaGrid({ personas }: { personas: Persona[] }) {
             {/* Name label */}
             <div
               className={cn(
-                "absolute inset-x-0 bottom-0 flex flex-col items-center justify-end pb-4 px-2 transition-all duration-500 ease-out",
+                "absolute inset-x-0 bottom-0 flex flex-col items-center justify-end pb-4 px-2 gap-1.5 transition-all duration-500 ease-out",
                 isExpanded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
               )}
             >
+              <span className="bg-white/90 text-black text-[10px] rounded-full px-2 py-0.5 backdrop-blur-sm truncate max-w-full">
+                {persona.type}
+              </span>
               <span className="text-white text-sm font-semibold drop-shadow-lg truncate max-w-full">
                 {persona.name}
               </span>

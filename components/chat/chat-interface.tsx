@@ -92,6 +92,7 @@ export function ChatInterface() {
     async (msg: { text: string; files?: FileList }) => {
       // Create a chat if none is active
       let chatId = activeChatId;
+      let isNewChat = false;
       if (!chatId) {
         const title =
           msg.text.slice(0, 50) + (msg.text.length > 50 ? "..." : "") || "Neuer Chat";
@@ -107,7 +108,9 @@ export function ChatInterface() {
 
         if (data) {
           chatId = data.id;
-          setActiveChatId(data.id);
+          isNewChat = true;
+          // Set ref directly so onFinish can use it — no re-render yet
+          chatIdRef.current = chatId;
         }
       }
 
@@ -121,7 +124,7 @@ export function ChatInterface() {
         });
       }
 
-      // Send to AI
+      // Send to AI BEFORE updating state to avoid useChat reinitialization
       if (msg.files && msg.files.length > 0) {
         sendMessage({
           text: msg.text,
@@ -131,6 +134,11 @@ export function ChatInterface() {
         sendMessage({
           text: msg.text,
         });
+      }
+
+      // Now update the active chat ID (triggers re-render, but message is already dispatched)
+      if (isNewChat && chatId) {
+        setActiveChatId(chatId);
       }
     },
     [activeChatId, selectedModel, selectedPersonaIds, sendMessage, setActiveChatId]
