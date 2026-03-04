@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useEffect } from "react";
+import Image from "next/image";
 import type { UIMessage } from "ai";
 import { MessageItem } from "./message-item";
 import { PersonaGrid } from "./persona-grid";
@@ -59,9 +60,31 @@ export function MessageList({
     );
   }
 
+  const activePersonas = personas.filter((p) => selectedPersonaIds.includes(p.id));
+
   return (
     <ScrollArea className="h-full">
       <div className="mx-auto max-w-3xl py-4">
+        {activePersonas.length > 0 && (
+          <div className="flex items-center gap-1 px-4 pb-3">
+            <div className="flex -space-x-2">
+              {activePersonas.map((p) => (
+                <div key={p.id} className="relative h-7 w-7 shrink-0 overflow-hidden rounded-full ring-2 ring-background">
+                  {p.image_url ? (
+                    <Image src={p.image_url} alt={p.name} fill className="object-cover" sizes="28px" />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center bg-muted text-xs font-semibold">
+                      {p.name[0]}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+            <span className="text-xs text-muted-foreground ml-1">
+              {activePersonas.map((p) => p.name).join(", ")}
+            </span>
+          </div>
+        )}
         {messages.map((message, index) => (
           <MessageItem
             key={message.id}

@@ -20,7 +20,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export function LeftSidebar({ isOpen: isOpenProp }: { isOpen?: boolean }) {
   const { chats, loading, deleteChat } = useChats();
-  const { activeChatId, setActiveChatId, leftSidebarOpen, toggleLeftSidebar, clearPersonas, setRightSidebarOpen, hasUnseenChat, setHasUnseenChat } =
+  const { activeChatId, setActiveChatId, setSelectedPersonaIds, leftSidebarOpen, toggleLeftSidebar, clearPersonas, setRightSidebarOpen, hasUnseenChat, setHasUnseenChat } =
     useAppStore();
   const isOpen = isOpenProp ?? leftSidebarOpen;
   const [deletingChatId, setDeletingChatId] = useState<string | null>(null);
@@ -47,6 +47,11 @@ export function LeftSidebar({ isOpen: isOpenProp }: { isOpen?: boolean }) {
 
   const handleChatClick = (chatId: string) => {
     setActiveChatId(chatId);
+    const chat = chats.find((c) => c.id === chatId);
+    if (chat?.persona_ids?.length) {
+      setSelectedPersonaIds(chat.persona_ids);
+      setRightSidebarOpen(true);
+    }
   };
 
   if (!isOpen) {
