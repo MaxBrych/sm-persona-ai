@@ -16,11 +16,13 @@ export function MessageList({
   status,
   personas,
   loading,
+  onRegenerate,
 }: {
   messages: UIMessage[];
   status: string;
   personas: Persona[];
   loading?: boolean;
+  onRegenerate?: () => void;
 }) {
   const { selectedPersonaIds } = useAppStore();
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -85,17 +87,24 @@ export function MessageList({
             </span>
           </div>
         )}
-        {messages.map((message, index) => (
-          <MessageItem
-            key={message.id}
-            message={message}
-            personas={personas}
-            selectedPersonaIds={selectedPersonaIds}
-            isStreaming={
-              isStreaming && index === messages.length - 1 && message.role === "assistant"
-            }
-          />
-        ))}
+        {messages.map((message, index) => {
+          const isLastAssistant =
+            message.role === "assistant" &&
+            index === messages.length - 1;
+          return (
+            <MessageItem
+              key={message.id}
+              message={message}
+              personas={personas}
+              selectedPersonaIds={selectedPersonaIds}
+              isStreaming={
+                isStreaming && isLastAssistant
+              }
+              onRegenerate={isLastAssistant ? onRegenerate : undefined}
+              allMessages={isLastAssistant ? messages : undefined}
+            />
+          );
+        })}
 
         {isSubmitted && (
           <div className="flex items-center gap-3 px-4 py-3">

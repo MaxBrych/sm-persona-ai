@@ -29,6 +29,7 @@ export function ChatInterface() {
     status,
     stop,
     setMessages,
+    regenerate,
   } = useChat({
     id: "chat",
     transport: new DefaultChatTransport({
@@ -149,7 +150,7 @@ export function ChatInterface() {
     <div className="flex h-full flex-col">
       <ChatHeader />
       <div className="flex-1 overflow-hidden">
-        <MessageList messages={messages} status={status} personas={personas} loading={personasLoading} />
+        <MessageList messages={messages} status={status} personas={personas} loading={personasLoading} onRegenerate={regenerate} />
       </div>
       <ChatInput onSend={handleSend} status={status} onStop={stop} />
     </div>

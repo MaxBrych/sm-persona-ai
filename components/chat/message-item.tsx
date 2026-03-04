@@ -2,6 +2,9 @@
 
 import Image from "next/image";
 import type { UIMessage } from "ai";
+import { RefreshCw, Share2, Check } from "lucide-react";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import { MarkdownRenderer } from "./markdown-renderer";
 import { ThinkingIndicator } from "./thinking-indicator";
 import { cn } from "@/lib/utils";
@@ -12,13 +15,18 @@ export function MessageItem({
   isStreaming,
   personas,
   selectedPersonaIds,
+  onRegenerate,
+  allMessages,
 }: {
   message: UIMessage;
   isStreaming?: boolean;
   personas?: Persona[];
   selectedPersonaIds?: string[];
+  onRegenerate?: () => void;
+  allMessages?: UIMessage[];
 }) {
   const isUser = message.role === "user";
+  const [copied, setCopied] = useState(false);
 
   const selectedPersonas =
     isUser && personas && selectedPersonaIds
@@ -105,6 +113,45 @@ export function MessageItem({
           }
         })}
       </div>
+      {!isUser && onRegenerate && !isStreaming && (
+        <div className="flex items-center gap-1 mt-1.5">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 text-muted-foreground hover:text-foreground cursor-pointer"
+            onClick={onRegenerate}
+          >
+            <RefreshCw className="h-3.5 w-3.5" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 text-muted-foreground hover:text-foreground cursor-pointer"
+            onClick={() => {
+              if (!allMessages) return;
+              const text = allMessages
+                .map((m) => {
+                  const role = m.role === "user" ? "Du" : "Persona AI";
+                  const content = m.parts
+                    .filter((p): p is { type: "text"; text: string } => p.type === "text")
+                    .map((p) => p.text)
+                    .join("");
+                  return `${role}:\n${content}`;
+                })
+                .join("\n\n---\n\n");
+              if (navigator.share) {
+                navigator.share({ title: "Persona AI Konversation", text });
+              } else {
+                navigator.clipboard.writeText(text);
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
+              }
+            }}
+          >
+            {copied ? <Check className="h-3.5 w-3.5" /> : <Share2 className="h-3.5 w-3.5" />}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
