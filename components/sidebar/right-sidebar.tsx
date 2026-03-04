@@ -78,7 +78,7 @@ export function RightSidebar() {
 
   if (viewingPersona) {
     return (
-      <div className="flex h-full flex-col min-w-[320px] overflow-hidden">
+      <div className="flex h-full flex-col min-w-[320px] min-h-0 overflow-hidden">
         <PersonaProfile
           persona={viewingPersona}
           onBack={() => setViewingPersona(null)}

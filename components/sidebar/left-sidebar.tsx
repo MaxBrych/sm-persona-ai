@@ -45,17 +45,34 @@ export function LeftSidebar() {
         <Button
           variant="ghost"
           size="icon"
-          className="h-8 w-8"
+          className="h-8 w-8 shrink-0"
           onClick={handleNewChat}
         >
           <Plus className="h-4 w-4" />
         </Button>
+        <ScrollArea className="flex-1 w-full">
+          <div className="flex flex-col items-center gap-0.5 pt-1">
+            {chats.map((chat) => (
+              <button
+                key={chat.id}
+                onClick={() => handleChatClick(chat.id)}
+                className={cn(
+                  "flex h-8 w-8 shrink-0 items-center justify-center rounded transition-colors hover:bg-sidebar-accent",
+                  activeChatId === chat.id && "bg-sidebar-accent"
+                )}
+                title={chat.title}
+              >
+                <MessageSquare className="h-3.5 w-3.5 text-muted-foreground" />
+              </button>
+            ))}
+          </div>
+        </ScrollArea>
       </div>
     );
   }
 
   return (
-    <div className="flex h-full flex-col min-w-[256px]">
+    <div className="flex h-full flex-col w-full min-w-0">
       <div className="flex h-12 shrink-0 items-center justify-between border-b px-3">
         <div className="flex items-center gap-2">
           <Button
