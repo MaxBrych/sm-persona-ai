@@ -23,13 +23,20 @@ export function ChatInterface({ chatId }: { chatId: string | null }) {
   const personaIdsRef = useRef(selectedPersonaIds);
   const chatIdRef = useRef(activeChatId);
   const pendingNewChatIdRef = useRef<string | null>(null);
+  const streamingChatIdRef = useRef<string | null>(null);
   const [optimisticMessage, setOptimisticMessage] = useState<{
     text: string;
     filePreviews: string[];
   } | null>(null);
+
+  // Generate a unique session ID for each "new chat" to avoid stale useChat cache
+  const [newSessionId, setNewSessionId] = useState(() => crypto.randomUUID());
+
   modelRef.current = selectedModel;
   personaIdsRef.current = selectedPersonaIds;
   chatIdRef.current = activeChatId;
+
+  const chatInstanceId = activeChatId ?? newSessionId;
 
   const {
     messages,
@@ -39,7 +46,7 @@ export function ChatInterface({ chatId }: { chatId: string | null }) {
     setMessages,
     regenerate,
   } = useChat({
-    id: activeChatId ?? "new",
+    id: chatInstanceId,
     transport: new DefaultChatTransport({
       api: "/api/chat",
       body: () => ({
@@ -48,37 +55,47 @@ export function ChatInterface({ chatId }: { chatId: string | null }) {
       }),
     }),
     onFinish: async ({ message }) => {
-      // Persist the assistant message
-      const currentChatId = chatIdRef.current;
-      if (currentChatId && message.role === "assistant") {
+      // Persist the assistant message using the chatId captured at send time
+      const targetChatId = streamingChatIdRef.current;
+      if (targetChatId && message.role === "assistant") {
         const textContent = message.parts
           .filter((p): p is { type: "text"; text: string } => p.type === "text")
           .map((p) => p.text)
           .join("");
 
         await supabase.from("messages").insert({
-          chat_id: currentChatId,
+          chat_id: targetChatId,
           role: "assistant",
           content: textContent,
           parts: message.parts,
         });
       }
 
-      // For new chats: now safe to commit the active chat ID (streaming is done)
+      // For new chats: only commit the active chat ID if user hasn't navigated away
       if (pendingNewChatIdRef.current) {
         setActiveChatId(pendingNewChatIdRef.current);
         pendingNewChatIdRef.current = null;
       }
+      streamingChatIdRef.current = null;
     },
   });
 
+  // Keep a stable ref for stop() so we can call it from effects
+  const stopRef = useRef(stop);
+  stopRef.current = stop;
+
   // Load messages and restore personas when activeChatId changes
   useEffect(() => {
-    // Clear pending ref if user navigated away mid-stream
+    // Clear pending ref — user navigated away intentionally
     pendingNewChatIdRef.current = null;
+
+    // Stop any ongoing stream (triggers onFinish → persists via streamingChatIdRef)
+    stopRef.current();
 
     if (!activeChatId) {
       setMessages([]);
+      // Generate a fresh session ID so useChat starts with empty message cache
+      setNewSessionId(crypto.randomUUID());
       return;
     }
 
@@ -188,6 +205,9 @@ export function ChatInterface({ chatId }: { chatId: string | null }) {
           aiParts.push({ type: "file", url: r.dataUrl, mediaType: r.mediaType, filename: r.filename });
         }
       }
+
+      // Capture chatId for onFinish to use (survives navigation)
+      streamingChatIdRef.current = chatId;
 
       // Persist the user message with Supabase URLs
       const parts: Array<{ type: string; text?: string; url?: string; mediaType?: string; filename?: string }> = [
