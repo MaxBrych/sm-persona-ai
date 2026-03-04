@@ -63,7 +63,7 @@ export function ChatInput({
       <div className="mx-auto max-w-3xl">
         <div className={cn("rounded-2xl border bg-muted px-4 pt-3 pb-2", !hasPersonas && "opacity-60")}>
           {!hasPersonas && (
-            <div className="flex items-center gap-2 pb-2 text-xs text-muted-foreground">
+            <div className="flex items-center gap-2 pb-2 text-sm text-foreground/70">
               <Info className="h-3.5 w-3.5 shrink-0" />
               <span>Wähle mindestens eine Persona aus, um den Chat zu starten.</span>
             </div>

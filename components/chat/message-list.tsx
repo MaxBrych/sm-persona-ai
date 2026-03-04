@@ -5,6 +5,7 @@ import type { UIMessage } from "ai";
 import { MessageItem } from "./message-item";
 import { PersonaGrid } from "./persona-grid";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Loader2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAppStore } from "@/hooks/use-app-store";
 import type { Persona } from "@/lib/types";
@@ -75,19 +76,7 @@ export function MessageList({
 
         {isSubmitted && (
           <div className="flex items-center gap-3 px-4 py-3">
-            <div className="flex items-end gap-0.5">
-              {[10, 16, 10].map((h, i) => (
-                <div
-                  key={i}
-                  className="w-1.5 origin-bottom rounded-full bg-muted-foreground/40"
-                  style={{
-                    height: h,
-                    animation: "pill-bounce 1.2s ease-in-out infinite",
-                    animationDelay: `${i * 150}ms`,
-                  }}
-                />
-              ))}
-            </div>
+            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
             <span
               className="text-sm animate-shimmer bg-[length:200%_100%] bg-clip-text bg-gradient-to-r from-muted-foreground via-foreground to-muted-foreground"
               style={{ WebkitTextFillColor: "transparent" }}
