@@ -37,10 +37,10 @@ export function ChatInterface({ chatId }: { chatId: string | null }) {
     id: "chat",
     transport: new DefaultChatTransport({
       api: "/api/chat",
-      body: {
-        model: selectedModel,
-        personaIds: selectedPersonaIds,
-      },
+      body: () => ({
+        model: modelRef.current,
+        personaIds: personaIdsRef.current,
+      }),
     }),
     onFinish: async ({ message }) => {
       // Persist the assistant message
