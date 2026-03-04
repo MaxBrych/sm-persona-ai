@@ -20,7 +20,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export function LeftSidebar({ isOpen: isOpenProp }: { isOpen?: boolean }) {
   const { chats, loading, deleteChat } = useChats();
-  const { activeChatId, setActiveChatId, leftSidebarOpen, toggleLeftSidebar, clearPersonas, setRightSidebarOpen } =
+  const { activeChatId, setActiveChatId, leftSidebarOpen, toggleLeftSidebar, clearPersonas, setRightSidebarOpen, hasUnseenChat, setHasUnseenChat } =
     useAppStore();
   const isOpen = isOpenProp ?? leftSidebarOpen;
   const [deletingChatId, setDeletingChatId] = useState<string | null>(null);
@@ -55,10 +55,13 @@ export function LeftSidebar({ isOpen: isOpenProp }: { isOpen?: boolean }) {
         <Button
           variant="ghost"
           size="icon"
-          className="h-8 w-8 shrink-0"
-          onClick={toggleLeftSidebar}
+          className="relative h-8 w-8 shrink-0"
+          onClick={() => { toggleLeftSidebar(); setHasUnseenChat(false); }}
         >
           <PanelLeft className="h-4 w-4" />
+          {hasUnseenChat && (
+            <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-primary" />
+          )}
         </Button>
       </div>
     );
@@ -72,7 +75,7 @@ export function LeftSidebar({ isOpen: isOpenProp }: { isOpen?: boolean }) {
             variant="ghost"
             size="icon"
             className="h-7 w-7"
-            onClick={toggleLeftSidebar}
+            onClick={() => { toggleLeftSidebar(); setHasUnseenChat(false); }}
           >
             <PanelLeft className="h-4 w-4" />
           </Button>

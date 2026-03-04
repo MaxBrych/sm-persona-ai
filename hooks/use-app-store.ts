@@ -21,6 +21,9 @@ interface AppStore {
   rightSidebarOpen: boolean;
   setRightSidebarOpen: (open: boolean) => void;
   toggleRightSidebar: () => void;
+
+  hasUnseenChat: boolean;
+  setHasUnseenChat: (v: boolean) => void;
 }
 
 export const useAppStore = create<AppStore>((set) => ({
@@ -50,4 +53,7 @@ export const useAppStore = create<AppStore>((set) => ({
   setRightSidebarOpen: (open) => set({ rightSidebarOpen: open }),
   toggleRightSidebar: () =>
     set((s) => ({ rightSidebarOpen: !s.rightSidebarOpen })),
+
+  hasUnseenChat: false,
+  setHasUnseenChat: (v) => set({ hasUnseenChat: v }),
 }));

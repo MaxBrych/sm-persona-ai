@@ -11,7 +11,7 @@ import { ChatInput } from "./chat-input";
 import { ChatHeader } from "./chat-header";
 
 export function ChatInterface() {
-  const { activeChatId, selectedPersonaIds, selectedModel, setActiveChatId } =
+  const { activeChatId, selectedPersonaIds, selectedModel, setActiveChatId, setHasUnseenChat } =
     useAppStore();
   const { personas, loading: personasLoading } = usePersonas();
 
@@ -111,6 +111,7 @@ export function ChatInterface() {
           isNewChat = true;
           // Set ref directly so onFinish can use it — no re-render yet
           chatIdRef.current = chatId;
+          setHasUnseenChat(true);
         }
       }
 
