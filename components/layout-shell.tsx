@@ -50,7 +50,7 @@ export function LayoutShell() {
         onMouseEnter={handleLeftEnter}
         onMouseLeave={handleLeftLeave}
         className={cn(
-          "shrink-0 border-r border-border bg-sidebar flex flex-col overflow-hidden transition-all duration-300 ease-in-out",
+          "shrink-0 border-r border-border bg-sidebar flex flex-col overflow-hidden transition-all duration-500 ease-in-out",
           leftOpen ? "w-64" : "w-12"
         )}
       >
@@ -65,7 +65,7 @@ export function LayoutShell() {
         onMouseEnter={handleRightEnter}
         onMouseLeave={handleRightLeave}
         className={cn(
-          "shrink-0 border-l border-border bg-sidebar flex flex-col overflow-hidden transition-all duration-300 ease-in-out",
+          "shrink-0 border-l border-border bg-sidebar flex flex-col overflow-hidden transition-all duration-500 ease-in-out",
           rightOpen ? "w-80" : "w-12"
         )}
       >

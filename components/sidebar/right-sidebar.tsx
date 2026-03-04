@@ -103,7 +103,7 @@ export function RightSidebar({ isOpen: isOpenProp }: { isOpen?: boolean }) {
   }
 
   return (
-    <div className="flex h-full flex-col min-w-[320px]">
+    <div className="flex h-full min-h-0 flex-col min-w-[320px]">
       <div className="flex h-12 shrink-0 items-center justify-between border-b px-3">
         <div className="flex items-center gap-2">
           <Button

@@ -6,6 +6,7 @@ import { MessageItem } from "./message-item";
 import { PersonaGrid } from "./persona-grid";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Loader2 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useAppStore } from "@/hooks/use-app-store";
 import type { Persona } from "@/lib/types";
 
@@ -13,10 +14,12 @@ export function MessageList({
   messages,
   status,
   personas,
+  loading,
 }: {
   messages: UIMessage[];
   status: string;
   personas: Persona[];
+  loading?: boolean;
 }) {
   const { selectedPersonaIds } = useAppStore();
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -39,7 +42,18 @@ export function MessageList({
               Produktentscheidungen, Zielgruppenanalysen oder Content-Strategien.
             </p>
           </div>
-          {personas.length > 0 && <PersonaGrid personas={personas} />}
+          {loading ? (
+            <div className="flex items-center justify-center gap-3 h-[320px]">
+              {Array.from({ length: 7 }).map((_, i) => (
+                <Skeleton
+                  key={i}
+                  className="h-[280px] w-[72px] rounded-[2rem] shrink-0"
+                />
+              ))}
+            </div>
+          ) : (
+            personas.length > 0 && <PersonaGrid personas={personas} />
+          )}
         </div>
       </div>
     );

@@ -43,14 +43,6 @@ export function LeftSidebar({ isOpen: isOpenProp }: { isOpen?: boolean }) {
         >
           <PanelLeft className="h-4 w-4" />
         </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8 shrink-0"
-          onClick={handleNewChat}
-        >
-          <Plus className="h-4 w-4" />
-        </Button>
         <ScrollArea className="flex-1 w-full">
           <div className="flex flex-col items-center gap-0.5 pt-1">
             {chats.map((chat) => (
@@ -112,7 +104,7 @@ export function LeftSidebar({ isOpen: isOpenProp }: { isOpen?: boolean }) {
                 key={chat.id}
                 onClick={() => handleChatClick(chat.id)}
                 className={cn(
-                  "group flex w-full min-w-0 items-center gap-2 rounded px-2.5 py-2 text-left text-sm transition-colors hover:bg-sidebar-accent",
+                  "group flex w-full min-w-0 overflow-hidden items-center gap-2 rounded px-2.5 py-2 text-left text-sm transition-colors hover:bg-sidebar-accent",
                   activeChatId === chat.id &&
                     "bg-sidebar-accent text-sidebar-accent-foreground"
                 )}

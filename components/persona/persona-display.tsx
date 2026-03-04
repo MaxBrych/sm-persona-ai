@@ -1,6 +1,5 @@
 "use client";
 
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { PersonaCard } from "./persona-card";
 import type { Persona } from "@/lib/types";
 
@@ -31,7 +30,7 @@ export function PersonaDisplay({
   }
 
   return (
-    <ScrollArea className="flex-1">
+    <div className="flex-1 overflow-y-auto">
       <div className="space-y-2 p-3">
         {selectedPersonas.map((persona) => (
           <PersonaCard
@@ -43,6 +42,6 @@ export function PersonaDisplay({
           />
         ))}
       </div>
-    </ScrollArea>
+    </div>
   );
 }

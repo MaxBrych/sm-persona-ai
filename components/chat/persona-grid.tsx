@@ -53,7 +53,8 @@ export function PersonaGrid({ personas }: { personas: Persona[] }) {
                   "object-cover transition-all duration-500 ease-out",
                   isHovered ? "brightness-110 scale-105" : "brightness-90"
                 )}
-                sizes="(max-width: 768px) 80px, 140px"
+                priority
+                sizes="140px"
               />
             ) : (
               <div
@@ -84,7 +85,7 @@ export function PersonaGrid({ personas }: { personas: Persona[] }) {
               <span className="bg-white/90 text-black text-[10px] rounded-full px-2 py-0.5 backdrop-blur-sm truncate max-w-full">
                 {persona.type}
               </span>
-              <span className="text-white text-base font-semibold drop-shadow-lg truncate max-w-full">
+              <span className="text-white text-lg font-semibold drop-shadow-lg truncate max-w-full">
                 {persona.name}
               </span>
             </div>
