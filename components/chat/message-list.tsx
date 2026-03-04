@@ -18,6 +18,7 @@ export function MessageList({
   loading,
   onRegenerate,
   activeChatId,
+  optimisticMessage,
 }: {
   messages: UIMessage[];
   status: string;
@@ -25,18 +26,19 @@ export function MessageList({
   loading?: boolean;
   onRegenerate?: () => void;
   activeChatId?: string | null;
+  optimisticMessage?: { text: string; filePreviews: string[] } | null;
 }) {
   const { selectedPersonaIds } = useAppStore();
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, status]);
+  }, [messages, status, optimisticMessage]);
 
   const isStreaming = status === "streaming";
   const isSubmitted = status === "submitted";
 
-  if (messages.length === 0) {
+  if (messages.length === 0 && !optimisticMessage) {
     return (
       <div className="flex h-full items-center justify-center px-8">
         <div className="text-center space-y-6">
@@ -107,6 +109,30 @@ export function MessageList({
             />
           );
         })}
+
+        {optimisticMessage && (
+          <div className="px-4 py-3 flex flex-col items-end">
+            <div className="max-w-[80%] flex flex-col items-end gap-2">
+              {optimisticMessage.filePreviews.map((url, i) => (
+                <div key={i} className="relative">
+                  <img
+                    src={url}
+                    alt=""
+                    className="max-h-48 max-w-48 rounded-lg opacity-50"
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Loader2 className="h-5 w-5 animate-spin text-foreground drop-shadow-md" />
+                  </div>
+                </div>
+              ))}
+              {optimisticMessage.text && (
+                <div className="inline-block rounded-2xl rounded-tr-none bg-muted text-foreground px-4 py-2.5 text-sm font-sans leading-relaxed">
+                  <p className="whitespace-pre-wrap">{optimisticMessage.text}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {isSubmitted && (
           <div className="flex items-center gap-3 px-4 py-3">

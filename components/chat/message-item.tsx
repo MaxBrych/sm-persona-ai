@@ -7,6 +7,7 @@ import { useState } from "react";
 import { supabase } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Skeleton } from "@/components/ui/skeleton";
 import { MarkdownRenderer } from "./markdown-renderer";
 import { ThinkingIndicator } from "./thinking-indicator";
 import { cn } from "@/lib/utils";
@@ -31,6 +32,7 @@ export function MessageItem({
   const [copied, setCopied] = useState(false);
   const [feedback, setFeedback] = useState<"thumbs_up" | "thumbs_down" | null>(null);
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
+  const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
 
   const messageContent = message.parts
     .filter((p): p is { type: "text"; text: string } => p.type === "text")
@@ -88,7 +90,7 @@ export function MessageItem({
       )}
       <div
         className={cn(
-          isUser ? "max-w-[80%]" : "max-w-none"
+          isUser ? "max-w-[80%] flex flex-col items-end gap-2" : "max-w-none"
         )}
       >
         {message.parts.map((part, index) => {
@@ -120,18 +122,30 @@ export function MessageItem({
               );
             case "file":
               if (part.mediaType?.startsWith("image/")) {
+                const isLoaded = loadedImages.has(index);
                 return (
-                  <img
-                    key={index}
-                    src={part.url}
-                    alt={part.filename || ""}
-                    className={cn(
-                      "rounded-lg",
-                      isUser ? "max-h-48 max-w-48" : "max-h-64 max-w-xs",
-                      "cursor-pointer hover:opacity-90 transition-opacity"
+                  <div key={index} className="relative">
+                    {!isLoaded && (
+                      <Skeleton
+                        className={cn(
+                          "rounded-lg",
+                          isUser ? "h-48 w-48" : "h-64 w-64"
+                        )}
+                      />
                     )}
-                    onClick={() => setLightboxUrl(part.url)}
-                  />
+                    <img
+                      src={part.url}
+                      alt={part.filename || ""}
+                      className={cn(
+                        "rounded-lg",
+                        isUser ? "max-h-48 max-w-48" : "max-h-64 max-w-xs",
+                        "cursor-pointer hover:opacity-90 transition-opacity",
+                        !isLoaded && "absolute top-0 left-0 opacity-0"
+                      )}
+                      onLoad={() => setLoadedImages((prev) => new Set(prev).add(index))}
+                      onClick={() => setLightboxUrl(part.url)}
+                    />
+                  </div>
                 );
               }
               return null;

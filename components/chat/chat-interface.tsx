@@ -2,7 +2,7 @@
 
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
-import { useEffect, useCallback, useRef } from "react";
+import { useEffect, useCallback, useRef, useState } from "react";
 import { useAppStore } from "@/hooks/use-app-store";
 import { useChatSync } from "@/hooks/use-chat-sync";
 import { usePersonas } from "@/hooks/use-personas";
@@ -22,6 +22,11 @@ export function ChatInterface({ chatId }: { chatId: string | null }) {
   const modelRef = useRef(selectedModel);
   const personaIdsRef = useRef(selectedPersonaIds);
   const chatIdRef = useRef(activeChatId);
+  const pendingNewChatIdRef = useRef<string | null>(null);
+  const [optimisticMessage, setOptimisticMessage] = useState<{
+    text: string;
+    filePreviews: string[];
+  } | null>(null);
   modelRef.current = selectedModel;
   personaIdsRef.current = selectedPersonaIds;
   chatIdRef.current = activeChatId;
@@ -58,11 +63,20 @@ export function ChatInterface({ chatId }: { chatId: string | null }) {
           parts: message.parts,
         });
       }
+
+      // For new chats: now safe to commit the active chat ID (streaming is done)
+      if (pendingNewChatIdRef.current) {
+        setActiveChatId(pendingNewChatIdRef.current);
+        pendingNewChatIdRef.current = null;
+      }
     },
   });
 
   // Load messages and restore personas when activeChatId changes
   useEffect(() => {
+    // Clear pending ref if user navigated away mid-stream
+    pendingNewChatIdRef.current = null;
+
     if (!activeChatId) {
       setMessages([]);
       return;
@@ -107,6 +121,13 @@ export function ChatInterface({ chatId }: { chatId: string | null }) {
 
   const handleSend = useCallback(
     async (msg: { text: string; files?: File[] }) => {
+      // Show optimistic message immediately for image uploads
+      let filePreviews: string[] = [];
+      if (msg.files && msg.files.length > 0) {
+        filePreviews = msg.files.map((f) => URL.createObjectURL(f));
+        setOptimisticMessage({ text: msg.text, filePreviews });
+      }
+
       // Create a chat if none is active
       let chatId = activeChatId;
       let isNewChat = false;
@@ -183,6 +204,10 @@ export function ChatInterface({ chatId }: { chatId: string | null }) {
         });
       }
 
+      // Clear optimistic message — sendMessage will add the real one
+      setOptimisticMessage(null);
+      filePreviews.forEach((url) => URL.revokeObjectURL(url));
+
       // Send to AI with data URLs (base64) so the model can process images
       if (aiParts.length > 0) {
         sendMessage({
@@ -195,20 +220,20 @@ export function ChatInterface({ chatId }: { chatId: string | null }) {
         });
       }
 
-      // Navigate to the new chat URL
+      // Update URL silently — don't change useChat id until streaming finishes
       if (isNewChat && chatId) {
-        setActiveChatId(chatId);
+        pendingNewChatIdRef.current = chatId;
         globalThis.history.replaceState(null, '', `/chat/${chatId}`);
       }
     },
-    [activeChatId, selectedModel, selectedPersonaIds, sendMessage, setActiveChatId]
+    [activeChatId, selectedModel, selectedPersonaIds, sendMessage, setHasUnseenChat, bumpChatListVersion]
   );
 
   return (
     <div className="flex h-full flex-col">
       <ChatHeader />
       <div className="flex-1 overflow-hidden">
-        <MessageList messages={messages} status={status} personas={personas} loading={personasLoading} onRegenerate={regenerate} activeChatId={activeChatId} />
+        <MessageList messages={messages} status={status} personas={personas} loading={personasLoading} onRegenerate={regenerate} activeChatId={activeChatId} optimisticMessage={optimisticMessage} />
       </div>
       <ChatInput onSend={handleSend} status={status} onStop={stop} />
     </div>
