@@ -3,7 +3,6 @@
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { useEffect, useCallback, useRef } from "react";
-import { useRouter } from "next/navigation";
 import { useAppStore } from "@/hooks/use-app-store";
 import { useChatSync } from "@/hooks/use-chat-sync";
 import { usePersonas } from "@/hooks/use-personas";
@@ -13,7 +12,6 @@ import { ChatInput } from "./chat-input";
 import { ChatHeader } from "./chat-header";
 
 export function ChatInterface({ chatId }: { chatId: string | null }) {
-  const router = useRouter();
   useChatSync(chatId);
 
   const { activeChatId, selectedPersonaIds, selectedModel, setActiveChatId, setSelectedPersonaIds, setRightSidebarOpen, setHasUnseenChat } =
@@ -159,10 +157,10 @@ export function ChatInterface({ chatId }: { chatId: string | null }) {
       // Navigate to the new chat URL
       if (isNewChat && chatId) {
         setActiveChatId(chatId);
-        router.push(`/chat/${chatId}`);
+        globalThis.history.replaceState(null, '', `/chat/${chatId}`);
       }
     },
-    [activeChatId, selectedModel, selectedPersonaIds, sendMessage, setActiveChatId, router]
+    [activeChatId, selectedModel, selectedPersonaIds, sendMessage, setActiveChatId]
   );
 
   return (
