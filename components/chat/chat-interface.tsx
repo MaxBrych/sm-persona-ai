@@ -132,27 +132,46 @@ export function ChatInterface({ chatId }: { chatId: string | null }) {
         }
       }
 
-      // Upload files to Supabase Storage and build FileUIParts
-      let fileParts: Array<{ type: "file"; url: string; mediaType: string; filename?: string }> = [];
+      // Upload files to Supabase Storage (for persistence) and convert to data URLs (for AI)
+      let storageParts: Array<{ type: "file"; url: string; mediaType: string; filename?: string }> = [];
+      let aiParts: Array<{ type: "file"; url: string; mediaType: string; filename?: string }> = [];
 
       if (msg.files && msg.files.length > 0) {
-        const uploads = await Promise.all(
+        const fileToDataUrl = (file: File): Promise<string> =>
+          new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.readAsDataURL(file);
+          });
+
+        const results = await Promise.all(
           msg.files.map(async (file) => {
-            const formData = new FormData();
-            formData.append("file", file);
-            const res = await fetch("/api/upload", { method: "POST", body: formData });
-            if (!res.ok) return null;
-            const data = await res.json();
-            return { type: "file" as const, url: data.url as string, mediaType: data.mediaType as string, filename: data.filename as string | undefined };
+            const [uploadResult, dataUrl] = await Promise.all([
+              (async () => {
+                const formData = new FormData();
+                formData.append("file", file);
+                const res = await fetch("/api/upload", { method: "POST", body: formData });
+                if (!res.ok) return null;
+                return res.json();
+              })(),
+              fileToDataUrl(file),
+            ]);
+            return { uploadResult, dataUrl, mediaType: file.type, filename: file.name };
           })
         );
-        fileParts = uploads.filter((u) => u !== null);
+
+        for (const r of results) {
+          if (r.uploadResult) {
+            storageParts.push({ type: "file", url: r.uploadResult.url, mediaType: r.mediaType, filename: r.filename });
+          }
+          aiParts.push({ type: "file", url: r.dataUrl, mediaType: r.mediaType, filename: r.filename });
+        }
       }
 
-      // Persist the user message with file parts
+      // Persist the user message with Supabase URLs
       const parts: Array<{ type: string; text?: string; url?: string; mediaType?: string; filename?: string }> = [
         { type: "text", text: msg.text },
-        ...fileParts,
+        ...storageParts,
       ];
 
       if (chatId) {
@@ -164,11 +183,11 @@ export function ChatInterface({ chatId }: { chatId: string | null }) {
         });
       }
 
-      // Send to AI with uploaded file URLs
-      if (fileParts.length > 0) {
+      // Send to AI with data URLs (base64) so the model can process images
+      if (aiParts.length > 0) {
         sendMessage({
           text: msg.text,
-          files: fileParts,
+          files: aiParts,
         });
       } else {
         sendMessage({
