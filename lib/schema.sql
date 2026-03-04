@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS messages (
   role TEXT NOT NULL CHECK (role IN ('user', 'assistant', 'system')),
   content TEXT NOT NULL DEFAULT '',
   parts JSONB,
+  feedback TEXT CHECK (feedback IN ('thumbs_up', 'thumbs_down')),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -37,6 +38,7 @@ CREATE TABLE IF NOT EXISTS messages (
 CREATE INDEX IF NOT EXISTS idx_messages_chat_id ON messages(chat_id);
 CREATE INDEX IF NOT EXISTS idx_messages_created_at ON messages(chat_id, created_at ASC);
 CREATE INDEX IF NOT EXISTS idx_chats_updated_at ON chats(updated_at DESC);
+CREATE INDEX IF NOT EXISTS idx_messages_feedback ON messages(feedback) WHERE feedback IS NOT NULL;
 
 -- Auto-update updated_at trigger
 CREATE OR REPLACE FUNCTION update_updated_at_column()

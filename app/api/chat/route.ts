@@ -33,6 +33,30 @@ export async function POST(req: Request) {
     }
   }
 
+  // Fetch liked messages for AI learning
+  const { data: likedMessages } = await supabase
+    .from("messages")
+    .select("content")
+    .eq("role", "assistant")
+    .eq("feedback", "thumbs_up")
+    .order("created_at", { ascending: false })
+    .limit(3);
+
+  if (likedMessages && likedMessages.length > 0) {
+    const examples = likedMessages
+      .map((m) => {
+        const truncated = m.content.length > 800 ? m.content.slice(0, 800) + "..." : m.content;
+        return `<liked_example>\n${truncated}\n</liked_example>`;
+      })
+      .join("\n\n");
+
+    systemPrompt += `\n\n## BEVORZUGTER ANTWORTSTIL
+
+Die folgenden Antworten wurden vom Produktteam als besonders hilfreich bewertet. Orientiere dich an diesem Stil, Detailgrad und dieser Struktur:
+
+${examples}`;
+  }
+
   const result = streamText({
     model: registry.languageModel(modelId as Parameters<typeof registry.languageModel>[0]),
     system: systemPrompt,

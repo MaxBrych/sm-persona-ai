@@ -2,8 +2,9 @@
 
 import Image from "next/image";
 import type { UIMessage } from "ai";
-import { RefreshCw, Share2, Check } from "lucide-react";
+import { RefreshCw, Share2, Check, ThumbsUp, ThumbsDown } from "lucide-react";
 import { useState } from "react";
+import { supabase } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { MarkdownRenderer } from "./markdown-renderer";
 import { ThinkingIndicator } from "./thinking-indicator";
@@ -16,17 +17,36 @@ export function MessageItem({
   personas,
   selectedPersonaIds,
   onRegenerate,
-  allMessages,
+  activeChatId,
 }: {
   message: UIMessage;
   isStreaming?: boolean;
   personas?: Persona[];
   selectedPersonaIds?: string[];
   onRegenerate?: () => void;
-  allMessages?: UIMessage[];
+  activeChatId?: string | null;
 }) {
   const isUser = message.role === "user";
   const [copied, setCopied] = useState(false);
+  const [feedback, setFeedback] = useState<"thumbs_up" | "thumbs_down" | null>(null);
+
+  const messageContent = message.parts
+    .filter((p): p is { type: "text"; text: string } => p.type === "text")
+    .map((p) => p.text)
+    .join("");
+
+  const handleFeedback = async (type: "thumbs_up" | "thumbs_down") => {
+    const newFeedback = feedback === type ? null : type;
+    setFeedback(newFeedback);
+
+    if (!activeChatId) return;
+    await supabase
+      .from("messages")
+      .update({ feedback: newFeedback })
+      .eq("chat_id", activeChatId)
+      .eq("role", "assistant")
+      .eq("content", messageContent);
+  };
 
   const selectedPersonas =
     isUser && personas && selectedPersonaIds
@@ -113,8 +133,31 @@ export function MessageItem({
           }
         })}
       </div>
-      {!isUser && onRegenerate && !isStreaming && (
+      {!isUser && !isStreaming && (
         <div className="flex items-center gap-1 mt-1.5">
+          <Button
+            variant="ghost"
+            size="icon"
+            className={cn(
+              "h-7 w-7 cursor-pointer",
+              feedback === "thumbs_up" ? "text-green-600" : "text-muted-foreground hover:text-foreground"
+            )}
+            onClick={() => handleFeedback("thumbs_up")}
+          >
+            <ThumbsUp className={cn("h-3.5 w-3.5", feedback === "thumbs_up" && "fill-current")} />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className={cn(
+              "h-7 w-7 cursor-pointer",
+              feedback === "thumbs_down" ? "text-red-500" : "text-muted-foreground hover:text-foreground"
+            )}
+            onClick={() => handleFeedback("thumbs_down")}
+          >
+            <ThumbsDown className={cn("h-3.5 w-3.5", feedback === "thumbs_down" && "fill-current")} />
+          </Button>
+          {onRegenerate && (
           <Button
             variant="ghost"
             size="icon"
@@ -123,26 +166,17 @@ export function MessageItem({
           >
             <RefreshCw className="h-3.5 w-3.5" />
           </Button>
+          )}
           <Button
             variant="ghost"
             size="icon"
             className="h-7 w-7 text-muted-foreground hover:text-foreground cursor-pointer"
             onClick={() => {
-              if (!allMessages) return;
-              const text = allMessages
-                .map((m) => {
-                  const role = m.role === "user" ? "Du" : "Persona AI";
-                  const content = m.parts
-                    .filter((p): p is { type: "text"; text: string } => p.type === "text")
-                    .map((p) => p.text)
-                    .join("");
-                  return `${role}:\n${content}`;
-                })
-                .join("\n\n---\n\n");
+              const url = window.location.href;
               if (navigator.share) {
-                navigator.share({ title: "Persona AI Konversation", text });
+                navigator.share({ title: "Persona AI Chat", url });
               } else {
-                navigator.clipboard.writeText(text);
+                navigator.clipboard.writeText(url);
                 setCopied(true);
                 setTimeout(() => setCopied(false), 2000);
               }

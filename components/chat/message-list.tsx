@@ -17,12 +17,14 @@ export function MessageList({
   personas,
   loading,
   onRegenerate,
+  activeChatId,
 }: {
   messages: UIMessage[];
   status: string;
   personas: Persona[];
   loading?: boolean;
   onRegenerate?: () => void;
+  activeChatId?: string | null;
 }) {
   const { selectedPersonaIds } = useAppStore();
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -101,7 +103,7 @@ export function MessageList({
                 isStreaming && isLastAssistant
               }
               onRegenerate={isLastAssistant ? onRegenerate : undefined}
-              allMessages={isLastAssistant ? messages : undefined}
+              activeChatId={activeChatId}
             />
           );
         })}

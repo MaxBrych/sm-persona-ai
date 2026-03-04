@@ -3,15 +3,20 @@
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { useEffect, useCallback, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { useAppStore } from "@/hooks/use-app-store";
+import { useChatSync } from "@/hooks/use-chat-sync";
 import { usePersonas } from "@/hooks/use-personas";
 import { supabase } from "@/lib/supabase/client";
 import { MessageList } from "./message-list";
 import { ChatInput } from "./chat-input";
 import { ChatHeader } from "./chat-header";
 
-export function ChatInterface() {
-  const { activeChatId, selectedPersonaIds, selectedModel, setActiveChatId, setHasUnseenChat } =
+export function ChatInterface({ chatId }: { chatId: string | null }) {
+  const router = useRouter();
+  useChatSync(chatId);
+
+  const { activeChatId, selectedPersonaIds, selectedModel, setActiveChatId, setSelectedPersonaIds, setRightSidebarOpen, setHasUnseenChat } =
     useAppStore();
   const { personas, loading: personasLoading } = usePersonas();
 
@@ -58,22 +63,23 @@ export function ChatInterface() {
     },
   });
 
-  // Load messages when activeChatId changes
+  // Load messages and restore personas when activeChatId changes
   useEffect(() => {
     if (!activeChatId) {
       setMessages([]);
       return;
     }
 
-    const loadMessages = async () => {
-      const { data } = await supabase
+    const loadChat = async () => {
+      // Load messages
+      const { data: messagesData } = await supabase
         .from("messages")
         .select("*")
         .eq("chat_id", activeChatId)
         .order("created_at", { ascending: true });
 
-      if (data && data.length > 0) {
-        const uiMessages = data.map((m) => ({
+      if (messagesData && messagesData.length > 0) {
+        const uiMessages = messagesData.map((m) => ({
           id: m.id,
           role: m.role as "user" | "assistant",
           content: m.content,
@@ -84,10 +90,22 @@ export function ChatInterface() {
       } else {
         setMessages([]);
       }
+
+      // Restore personas from chat record (needed for direct URL access)
+      const { data: chatData } = await supabase
+        .from("chats")
+        .select("persona_ids")
+        .eq("id", activeChatId)
+        .single();
+
+      if (chatData?.persona_ids?.length) {
+        setSelectedPersonaIds(chatData.persona_ids);
+        setRightSidebarOpen(true);
+      }
     };
 
-    loadMessages();
-  }, [activeChatId, setMessages]);
+    loadChat();
+  }, [activeChatId, setMessages, setSelectedPersonaIds, setRightSidebarOpen]);
 
   const handleSend = useCallback(
     async (msg: { text: string; files?: FileList }) => {
@@ -138,19 +156,20 @@ export function ChatInterface() {
         });
       }
 
-      // Now update the active chat ID (triggers re-render, but message is already dispatched)
+      // Navigate to the new chat URL
       if (isNewChat && chatId) {
         setActiveChatId(chatId);
+        router.push(`/chat/${chatId}`);
       }
     },
-    [activeChatId, selectedModel, selectedPersonaIds, sendMessage, setActiveChatId]
+    [activeChatId, selectedModel, selectedPersonaIds, sendMessage, setActiveChatId, router]
   );
 
   return (
     <div className="flex h-full flex-col">
       <ChatHeader />
       <div className="flex-1 overflow-hidden">
-        <MessageList messages={messages} status={status} personas={personas} loading={personasLoading} onRegenerate={regenerate} />
+        <MessageList messages={messages} status={status} personas={personas} loading={personasLoading} onRegenerate={regenerate} activeChatId={activeChatId} />
       </div>
       <ChatInput onSend={handleSend} status={status} onStop={stop} />
     </div>
