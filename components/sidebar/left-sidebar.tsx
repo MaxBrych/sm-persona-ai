@@ -107,7 +107,7 @@ export function LeftSidebar({ isOpen: isOpenProp }: { isOpen?: boolean }) {
                 key={chat.id}
                 onClick={() => handleChatClick(chat.id)}
                 className={cn(
-                  "group flex w-full min-w-0 overflow-hidden items-center gap-2 rounded px-2.5 py-2 text-left text-sm transition-colors hover:bg-sidebar-accent",
+                  "group flex w-full min-w-0 items-center gap-2 rounded px-2.5 py-2 text-left text-sm transition-colors hover:bg-sidebar-accent",
                   activeChatId === chat.id &&
                     "bg-sidebar-accent text-sidebar-accent-foreground"
                 )}
