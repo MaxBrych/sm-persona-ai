@@ -2,11 +2,13 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabase/client";
+import { useAppStore } from "@/hooks/use-app-store";
 import type { Chat } from "@/lib/types";
 
 export function useChats() {
   const [chats, setChats] = useState<Chat[]>([]);
   const [loading, setLoading] = useState(true);
+  const chatListVersion = useAppStore((s) => s.chatListVersion);
 
   const fetchChats = useCallback(async () => {
     setLoading(true);
@@ -21,7 +23,7 @@ export function useChats() {
 
   useEffect(() => {
     fetchChats();
-  }, [fetchChats]);
+  }, [fetchChats, chatListVersion]);
 
   const createChat = async (chat: {
     title?: string;

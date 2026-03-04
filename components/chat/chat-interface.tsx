@@ -14,7 +14,7 @@ import { ChatHeader } from "./chat-header";
 export function ChatInterface({ chatId }: { chatId: string | null }) {
   useChatSync(chatId);
 
-  const { activeChatId, selectedPersonaIds, selectedModel, setActiveChatId, setSelectedPersonaIds, setRightSidebarOpen, setHasUnseenChat } =
+  const { activeChatId, selectedPersonaIds, selectedModel, setActiveChatId, setSelectedPersonaIds, setRightSidebarOpen, setHasUnseenChat, bumpChatListVersion } =
     useAppStore();
   const { personas, loading: personasLoading } = usePersonas();
 
@@ -34,7 +34,7 @@ export function ChatInterface({ chatId }: { chatId: string | null }) {
     setMessages,
     regenerate,
   } = useChat({
-    id: "chat",
+    id: activeChatId ?? "new",
     transport: new DefaultChatTransport({
       api: "/api/chat",
       body: () => ({
@@ -129,6 +129,7 @@ export function ChatInterface({ chatId }: { chatId: string | null }) {
           // Set ref directly so onFinish can use it — no re-render yet
           chatIdRef.current = chatId;
           setHasUnseenChat(true);
+          bumpChatListVersion();
         }
       }
 

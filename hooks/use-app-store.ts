@@ -24,6 +24,9 @@ interface AppStore {
 
   hasUnseenChat: boolean;
   setHasUnseenChat: (v: boolean) => void;
+
+  chatListVersion: number;
+  bumpChatListVersion: () => void;
 }
 
 export const useAppStore = create<AppStore>((set) => ({
@@ -56,4 +59,7 @@ export const useAppStore = create<AppStore>((set) => ({
 
   hasUnseenChat: false,
   setHasUnseenChat: (v) => set({ hasUnseenChat: v }),
+
+  chatListVersion: 0,
+  bumpChatListVersion: () => set((s) => ({ chatListVersion: s.chatListVersion + 1 })),
 }));
