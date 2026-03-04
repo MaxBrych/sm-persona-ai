@@ -76,14 +76,14 @@ export function MessageList({
         {isSubmitted && (
           <div className="flex items-center gap-3 px-4 py-3">
             <div className="flex items-end gap-0.5">
-              {[14, 22, 14].map((h, i) => (
+              {[10, 16, 10].map((h, i) => (
                 <div
                   key={i}
-                  className="w-1.5 rounded-full bg-muted-foreground/40 animate-pulse"
+                  className="w-1.5 origin-bottom rounded-full bg-muted-foreground/40"
                   style={{
                     height: h,
+                    animation: "pill-bounce 1.2s ease-in-out infinite",
                     animationDelay: `${i * 150}ms`,
-                    animationDuration: "1s",
                   }}
                 />
               ))}
