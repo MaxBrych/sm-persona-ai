@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import type { UIMessage } from "ai";
-import { RefreshCw, Share2, Check, ThumbsUp, ThumbsDown } from "lucide-react";
+import { RefreshCw, Copy, Check, ThumbsUp, ThumbsDown } from "lucide-react";
 import { useState } from "react";
 import { supabase } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -172,17 +172,12 @@ export function MessageItem({
             size="icon"
             className="h-7 w-7 text-muted-foreground hover:text-foreground cursor-pointer"
             onClick={() => {
-              const url = window.location.href;
-              if (navigator.share) {
-                navigator.share({ title: "Persona AI Chat", url });
-              } else {
-                navigator.clipboard.writeText(url);
-                setCopied(true);
-                setTimeout(() => setCopied(false), 2000);
-              }
+              navigator.clipboard.writeText(globalThis.location.href);
+              setCopied(true);
+              setTimeout(() => setCopied(false), 2000);
             }}
           >
-            {copied ? <Check className="h-3.5 w-3.5" /> : <Share2 className="h-3.5 w-3.5" />}
+            {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
           </Button>
         </div>
       )}
