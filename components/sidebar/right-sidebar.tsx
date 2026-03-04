@@ -14,10 +14,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import type { Persona, PersonaData } from "@/lib/types";
 
-export function RightSidebar() {
+export function RightSidebar({ isOpen: isOpenProp }: { isOpen?: boolean }) {
   const { personas, loading, createPersona, updatePersona, deletePersona } =
     usePersonas();
   const { selectedPersonaIds, rightSidebarOpen, toggleRightSidebar } = useAppStore();
+  const isOpen = isOpenProp ?? rightSidebarOpen;
   const [formOpen, setFormOpen] = useState(false);
   const [editingPersona, setEditingPersona] = useState<Persona | undefined>();
   const [viewingPersona, setViewingPersona] = useState<Persona | null>(null);
@@ -61,7 +62,7 @@ export function RightSidebar() {
     }
   };
 
-  if (!rightSidebarOpen) {
+  if (!isOpen) {
     return (
       <div className="flex h-full flex-col items-center py-2 gap-1">
         <Button

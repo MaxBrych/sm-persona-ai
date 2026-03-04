@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, type KeyboardEvent } from "react";
-import { ArrowUp, Square, ImagePlus } from "lucide-react";
+import { ArrowUp, Square, ImagePlus, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -28,10 +28,11 @@ export function ChatInput({
   const [files, setFiles] = useState<FileList | undefined>();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const { selectedModel, setSelectedModel } = useAppStore();
+  const { selectedModel, setSelectedModel, selectedPersonaIds } = useAppStore();
 
   const isLoading = status === "streaming" || status === "submitted";
-  const canSend = !!(input.trim() || files);
+  const hasPersonas = selectedPersonaIds.length > 0;
+  const canSend = hasPersonas && !!(input.trim() || files);
 
   const handleSend = () => {
     if (!canSend) return;
@@ -60,7 +61,13 @@ export function ChatInput({
   return (
     <div className="bg-background px-4 pb-4 pt-2">
       <div className="mx-auto max-w-3xl">
-        <div className="rounded-2xl border bg-muted px-4 pt-3 pb-2">
+        <div className={cn("rounded-2xl border bg-muted px-4 pt-3 pb-2", !hasPersonas && "opacity-60")}>
+          {!hasPersonas && (
+            <div className="flex items-center gap-2 pb-2 text-xs text-muted-foreground">
+              <Info className="h-3.5 w-3.5 shrink-0" />
+              <span>Wähle mindestens eine Persona aus, um den Chat zu starten.</span>
+            </div>
+          )}
           {files && files.length > 0 && (
             <div className="mb-2 flex flex-wrap gap-2">
               {Array.from(files).map((file, i) => (
@@ -89,8 +96,9 @@ export function ChatInput({
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Frage stellen... (⌘+Enter zum Senden)"
-            className="min-h-[44px] max-h-[200px] resize-none border-0 bg-transparent p-0 text-sm shadow-none focus-visible:ring-0"
+            placeholder={hasPersonas ? "Frage stellen... (⌘+Enter zum Senden)" : "Personas auswählen..."}
+            disabled={!hasPersonas}
+            className="min-h-[44px] max-h-[200px] resize-none border-0 bg-transparent p-0 text-sm shadow-none focus-visible:ring-0 disabled:cursor-not-allowed"
             rows={1}
           />
 

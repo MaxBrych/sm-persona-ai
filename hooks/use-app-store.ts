@@ -15,6 +15,7 @@ interface AppStore {
   setSelectedModel: (model: string) => void;
 
   leftSidebarOpen: boolean;
+  setLeftSidebarOpen: (open: boolean) => void;
   toggleLeftSidebar: () => void;
 
   rightSidebarOpen: boolean;
@@ -41,6 +42,7 @@ export const useAppStore = create<AppStore>((set) => ({
   setSelectedModel: (model) => set({ selectedModel: model }),
 
   leftSidebarOpen: false,
+  setLeftSidebarOpen: (open) => set({ leftSidebarOpen: open }),
   toggleLeftSidebar: () =>
     set((s) => ({ leftSidebarOpen: !s.leftSidebarOpen })),
 

@@ -4,7 +4,6 @@ import Image from "next/image";
 import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import type { Persona } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -67,7 +66,7 @@ export function PersonaProfile({
         <span className="text-sm font-semibold">Zurück</span>
       </div>
 
-      <ScrollArea className="flex-1">
+      <div className="flex-1 overflow-y-auto">
         <div className="p-4 space-y-4 text-sm">
           {/* Header */}
           <div className="flex items-center gap-3">
@@ -233,7 +232,7 @@ export function PersonaProfile({
             </>
           )}
         </div>
-      </ScrollArea>
+      </div>
     </div>
   );
 }

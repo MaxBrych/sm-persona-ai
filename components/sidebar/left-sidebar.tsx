@@ -8,10 +8,11 @@ import { useAppStore } from "@/hooks/use-app-store";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export function LeftSidebar() {
+export function LeftSidebar({ isOpen: isOpenProp }: { isOpen?: boolean }) {
   const { chats, loading, deleteChat } = useChats();
   const { activeChatId, setActiveChatId, leftSidebarOpen, toggleLeftSidebar, clearPersonas, setRightSidebarOpen } =
     useAppStore();
+  const isOpen = isOpenProp ?? leftSidebarOpen;
 
   const handleNewChat = () => {
     setActiveChatId(null);
@@ -31,7 +32,7 @@ export function LeftSidebar() {
     setActiveChatId(chatId);
   };
 
-  if (!leftSidebarOpen) {
+  if (!isOpen) {
     return (
       <div className="flex h-full flex-col items-center py-2 gap-1">
         <Button
