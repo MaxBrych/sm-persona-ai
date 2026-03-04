@@ -6,6 +6,7 @@ import { RefreshCw, Copy, Check, ThumbsUp, ThumbsDown } from "lucide-react";
 import { useState } from "react";
 import { supabase } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { MarkdownRenderer } from "./markdown-renderer";
 import { ThinkingIndicator } from "./thinking-indicator";
 import { cn } from "@/lib/utils";
@@ -29,6 +30,7 @@ export function MessageItem({
   const isUser = message.role === "user";
   const [copied, setCopied] = useState(false);
   const [feedback, setFeedback] = useState<"thumbs_up" | "thumbs_down" | null>(null);
+  const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
 
   const messageContent = message.parts
     .filter((p): p is { type: "text"; text: string } => p.type === "text")
@@ -122,8 +124,13 @@ export function MessageItem({
                   <img
                     key={index}
                     src={part.url}
-                    alt=""
-                    className="max-w-sm rounded-lg"
+                    alt={part.filename || ""}
+                    className={cn(
+                      "rounded-lg",
+                      isUser ? "max-h-48 max-w-48" : "max-h-64 max-w-xs",
+                      "cursor-pointer hover:opacity-90 transition-opacity"
+                    )}
+                    onClick={() => setLightboxUrl(part.url)}
                   />
                 );
               }
@@ -181,6 +188,19 @@ export function MessageItem({
           </Button>
         </div>
       )}
+
+      <Dialog open={!!lightboxUrl} onOpenChange={() => setLightboxUrl(null)}>
+        <DialogContent className="max-w-4xl p-2 bg-transparent border-none shadow-none">
+          <DialogTitle className="sr-only">Bild-Vorschau</DialogTitle>
+          {lightboxUrl && (
+            <img
+              src={lightboxUrl}
+              alt=""
+              className="w-full h-auto max-h-[85vh] object-contain rounded-lg"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

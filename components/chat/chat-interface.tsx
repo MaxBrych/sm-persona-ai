@@ -106,7 +106,7 @@ export function ChatInterface({ chatId }: { chatId: string | null }) {
   }, [activeChatId, setMessages, setSelectedPersonaIds, setRightSidebarOpen]);
 
   const handleSend = useCallback(
-    async (msg: { text: string; files?: FileList }) => {
+    async (msg: { text: string; files?: File[] }) => {
       // Create a chat if none is active
       let chatId = activeChatId;
       let isNewChat = false;
@@ -126,28 +126,49 @@ export function ChatInterface({ chatId }: { chatId: string | null }) {
         if (data) {
           chatId = data.id;
           isNewChat = true;
-          // Set ref directly so onFinish can use it — no re-render yet
           chatIdRef.current = chatId;
           setHasUnseenChat(true);
           bumpChatListVersion();
         }
       }
 
-      // Persist the user message
+      // Upload files to Supabase Storage and build FileUIParts
+      let fileParts: Array<{ type: "file"; url: string; mediaType: string; filename?: string }> = [];
+
+      if (msg.files && msg.files.length > 0) {
+        const uploads = await Promise.all(
+          msg.files.map(async (file) => {
+            const formData = new FormData();
+            formData.append("file", file);
+            const res = await fetch("/api/upload", { method: "POST", body: formData });
+            if (!res.ok) return null;
+            const data = await res.json();
+            return { type: "file" as const, url: data.url as string, mediaType: data.mediaType as string, filename: data.filename as string | undefined };
+          })
+        );
+        fileParts = uploads.filter((u) => u !== null);
+      }
+
+      // Persist the user message with file parts
+      const parts: Array<{ type: string; text?: string; url?: string; mediaType?: string; filename?: string }> = [
+        { type: "text", text: msg.text },
+        ...fileParts,
+      ];
+
       if (chatId) {
         await supabase.from("messages").insert({
           chat_id: chatId,
           role: "user",
           content: msg.text,
-          parts: [{ type: "text", text: msg.text }],
+          parts,
         });
       }
 
-      // Send to AI BEFORE updating state to avoid useChat reinitialization
-      if (msg.files && msg.files.length > 0) {
+      // Send to AI with uploaded file URLs
+      if (fileParts.length > 0) {
         sendMessage({
           text: msg.text,
-          files: msg.files,
+          files: fileParts,
         });
       } else {
         sendMessage({

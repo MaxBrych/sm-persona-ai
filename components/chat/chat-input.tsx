@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef, useState, type KeyboardEvent } from "react";
-import { ArrowUp, Square, ImagePlus, Info } from "lucide-react";
+import { useRef, useState, useEffect, type KeyboardEvent, type DragEvent } from "react";
+import { ArrowUp, Square, ImagePlus, Info, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -20,25 +20,45 @@ export function ChatInput({
   status,
   onStop,
 }: {
-  onSend: (msg: { text: string; files?: FileList }) => void;
+  onSend: (msg: { text: string; files?: File[] }) => void;
   status: string;
   onStop: () => void;
 }) {
   const [input, setInput] = useState("");
-  const [files, setFiles] = useState<FileList | undefined>();
+  const [files, setFiles] = useState<File[]>([]);
+  const [isDragging, setIsDragging] = useState(false);
+  const [previews, setPreviews] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { selectedModel, setSelectedModel, selectedPersonaIds } = useAppStore();
 
   const isLoading = status === "streaming" || status === "submitted";
   const hasPersonas = selectedPersonaIds.length > 0;
-  const canSend = hasPersonas && !!(input.trim() || files);
+  const canSend = hasPersonas && !!(input.trim() || files.length > 0);
+
+  // Generate and clean up object URL previews
+  useEffect(() => {
+    const urls = files.map((f) => URL.createObjectURL(f));
+    setPreviews(urls);
+    return () => urls.forEach((u) => URL.revokeObjectURL(u));
+  }, [files]);
+
+  const addFiles = (newFiles: File[]) => {
+    const imageFiles = newFiles.filter((f) => f.type.startsWith("image/"));
+    if (imageFiles.length > 0) {
+      setFiles((prev) => [...prev, ...imageFiles]);
+    }
+  };
+
+  const removeFile = (index: number) => {
+    setFiles((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const handleSend = () => {
     if (!canSend) return;
-    onSend({ text: input, files });
+    onSend({ text: input, files: files.length > 0 ? files : undefined });
     setInput("");
-    setFiles(undefined);
+    setFiles([]);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -54,37 +74,83 @@ export function ChatInput({
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      setFiles(e.target.files);
+      addFiles(Array.from(e.target.files));
+      e.target.value = "";
+    }
+  };
+
+  const handleDragOver = (e: DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isDragging) setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      addFiles(Array.from(e.dataTransfer.files));
+    }
+  };
+
+  const handlePaste = (e: React.ClipboardEvent) => {
+    const pastedFiles = Array.from(e.clipboardData.items)
+      .filter((item) => item.type.startsWith("image/"))
+      .map((item) => item.getAsFile())
+      .filter((f): f is File => f !== null);
+    if (pastedFiles.length > 0) {
+      addFiles(pastedFiles);
     }
   };
 
   return (
     <div className="bg-background px-4 pb-4 pt-2">
       <div className="mx-auto max-w-3xl">
-        <div className={cn("rounded-2xl border bg-muted px-4 pt-3 pb-2", !hasPersonas && "opacity-60")}>
+        <div
+          className={cn(
+            "rounded-2xl border bg-muted px-4 pt-3 pb-2 transition-colors",
+            !hasPersonas && "opacity-60",
+            isDragging && "border-primary border-dashed bg-primary/5"
+          )}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+        >
           {!hasPersonas && (
             <div className="flex items-center gap-2 pb-2 text-sm text-foreground/70">
               <Info className="h-3.5 w-3.5 shrink-0" />
               <span>Wähle mindestens eine Persona aus, um den Chat zu starten.</span>
             </div>
           )}
-          {files && files.length > 0 && (
+
+          {isDragging && (
+            <div className="flex items-center justify-center py-4 text-sm text-primary font-medium">
+              <ImagePlus className="h-4 w-4 mr-2" />
+              Bild hier ablegen
+            </div>
+          )}
+
+          {files.length > 0 && !isDragging && (
             <div className="mb-2 flex flex-wrap gap-2">
-              {Array.from(files).map((file, i) => (
-                <div
-                  key={i}
-                  className="flex items-center gap-1.5 rounded-lg bg-background px-2 py-1 text-xs"
-                >
-                  <ImagePlus className="h-3 w-3" />
-                  <span className="max-w-[120px] truncate">{file.name}</span>
+              {files.map((file, i) => (
+                <div key={i} className="relative group">
+                  <img
+                    src={previews[i]}
+                    alt={file.name}
+                    className="h-16 w-16 rounded-lg object-cover border"
+                  />
                   <button
-                    onClick={() => {
-                      setFiles(undefined);
-                      if (fileInputRef.current) fileInputRef.current.value = "";
-                    }}
-                    className="ml-1 text-muted-foreground hover:text-foreground"
+                    onClick={() => removeFile(i)}
+                    className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
                   >
-                    &times;
+                    <X className="h-3 w-3" />
                   </button>
                 </div>
               ))}
@@ -96,6 +162,7 @@ export function ChatInput({
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
+            onPaste={handlePaste}
             placeholder={hasPersonas ? "Frage stellen... (⌘+Enter zum Senden)" : "Personas auswählen..."}
             disabled={!hasPersonas}
             className="min-h-[44px] max-h-[200px] resize-none border-0 bg-transparent p-0 text-sm shadow-none focus-visible:ring-0 disabled:cursor-not-allowed"
