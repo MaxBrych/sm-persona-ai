@@ -68,7 +68,7 @@ export function RightSidebar({ isOpen: isOpenProp }: { isOpen?: boolean }) {
         <Button
           variant="ghost"
           size="icon"
-          className="h-8 w-8 shrink-0"
+          className="h-8 w-8 shrink-0 cursor-pointer"
           onClick={toggleRightSidebar}
         >
           <PanelRight className="h-4 w-4" />
@@ -109,7 +109,7 @@ export function RightSidebar({ isOpen: isOpenProp }: { isOpen?: boolean }) {
           <Button
             variant="ghost"
             size="icon"
-            className="h-7 w-7"
+            className="h-7 w-7 cursor-pointer"
             onClick={toggleRightSidebar}
           >
             <PanelRight className="h-4 w-4" />
@@ -119,7 +119,7 @@ export function RightSidebar({ isOpen: isOpenProp }: { isOpen?: boolean }) {
         <Button
           variant="ghost"
           size="icon"
-          className="h-7 w-7"
+          className="h-7 w-7 cursor-pointer"
           onClick={handleCreate}
         >
           <Plus className="h-4 w-4" />

@@ -103,7 +103,7 @@ export function PersonaCard({
         <Button
           variant="outline"
           size="sm"
-          className="mt-3 w-full text-xs"
+          className="mt-3 w-full text-xs cursor-pointer"
           onClick={onViewProfile}
         >
           Profil anzeigen

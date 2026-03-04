@@ -58,7 +58,7 @@ export function PersonaProfile({
         <Button
           variant="ghost"
           size="icon"
-          className="h-7 w-7"
+          className="h-7 w-7 cursor-pointer"
           onClick={onBack}
         >
           <ArrowLeft className="h-4 w-4" />

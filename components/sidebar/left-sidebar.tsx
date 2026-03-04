@@ -55,7 +55,7 @@ export function LeftSidebar({ isOpen: isOpenProp }: { isOpen?: boolean }) {
         <Button
           variant="ghost"
           size="icon"
-          className="relative h-8 w-8 shrink-0"
+          className="relative h-8 w-8 shrink-0 cursor-pointer"
           onClick={() => { toggleLeftSidebar(); setHasUnseenChat(false); }}
         >
           <PanelLeft className="h-4 w-4" />
@@ -74,7 +74,7 @@ export function LeftSidebar({ isOpen: isOpenProp }: { isOpen?: boolean }) {
           <Button
             variant="ghost"
             size="icon"
-            className="h-7 w-7"
+            className="h-7 w-7 cursor-pointer"
             onClick={() => { toggleLeftSidebar(); setHasUnseenChat(false); }}
           >
             <PanelLeft className="h-4 w-4" />
@@ -84,7 +84,7 @@ export function LeftSidebar({ isOpen: isOpenProp }: { isOpen?: boolean }) {
         <Button
           variant="ghost"
           size="icon"
-          className="h-7 w-7"
+          className="h-7 w-7 cursor-pointer"
           onClick={handleNewChat}
         >
           <Plus className="h-4 w-4" />
@@ -107,7 +107,7 @@ export function LeftSidebar({ isOpen: isOpenProp }: { isOpen?: boolean }) {
                 key={chat.id}
                 onClick={() => handleChatClick(chat.id)}
                 className={cn(
-                  "group flex w-full min-w-0 items-center gap-2 rounded px-2.5 py-2 text-left text-sm transition-colors hover:bg-sidebar-accent",
+                  "group flex w-full min-w-0 items-center gap-2 rounded px-2.5 py-2 text-left text-sm transition-colors hover:bg-sidebar-accent cursor-pointer",
                   activeChatId === chat.id &&
                     "bg-sidebar-accent text-sidebar-accent-foreground"
                 )}
