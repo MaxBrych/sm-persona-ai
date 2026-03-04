@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useAppStore } from "@/hooks/use-app-store";
 import { LeftSidebar } from "./sidebar/left-sidebar";
 import { ChatInterface } from "./chat/chat-interface";
@@ -7,7 +8,13 @@ import { RightSidebar } from "./sidebar/right-sidebar";
 import { cn } from "@/lib/utils";
 
 export function LayoutShell() {
-  const { leftSidebarOpen, rightSidebarOpen } = useAppStore();
+  const { leftSidebarOpen, rightSidebarOpen, selectedPersonaIds, setRightSidebarOpen } = useAppStore();
+
+  useEffect(() => {
+    if (selectedPersonaIds.length === 0) {
+      setRightSidebarOpen(false);
+    }
+  }, [selectedPersonaIds, setRightSidebarOpen]);
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">

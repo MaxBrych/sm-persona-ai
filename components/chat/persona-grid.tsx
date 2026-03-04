@@ -84,7 +84,7 @@ export function PersonaGrid({ personas }: { personas: Persona[] }) {
               <span className="bg-white/90 text-black text-[10px] rounded-full px-2 py-0.5 backdrop-blur-sm truncate max-w-full">
                 {persona.type}
               </span>
-              <span className="text-white text-sm font-semibold drop-shadow-lg truncate max-w-full">
+              <span className="text-white text-base font-semibold drop-shadow-lg truncate max-w-full">
                 {persona.name}
               </span>
             </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, type KeyboardEvent } from "react";
-import { Plus, ArrowUp, Square, ImagePlus } from "lucide-react";
+import { ArrowUp, Square, ImagePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -111,7 +111,7 @@ export function ChatInput({
               onClick={() => fileInputRef.current?.click()}
               disabled={isLoading}
             >
-              <Plus className="h-4 w-4" />
+              <ImagePlus className="h-4 w-4" />
             </Button>
 
             <div className="flex items-center gap-2">

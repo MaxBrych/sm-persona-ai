@@ -10,11 +10,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export function LeftSidebar() {
   const { chats, loading, deleteChat } = useChats();
-  const { activeChatId, setActiveChatId, leftSidebarOpen, toggleLeftSidebar } =
+  const { activeChatId, setActiveChatId, leftSidebarOpen, toggleLeftSidebar, clearPersonas, setRightSidebarOpen } =
     useAppStore();
 
   const handleNewChat = () => {
     setActiveChatId(null);
+    clearPersonas();
+    setRightSidebarOpen(false);
   };
 
   const handleDeleteChat = async (e: React.MouseEvent, chatId: string) => {
@@ -92,7 +94,7 @@ export function LeftSidebar() {
                 key={chat.id}
                 onClick={() => handleChatClick(chat.id)}
                 className={cn(
-                  "group flex w-full items-center gap-2 rounded px-2.5 py-2 text-left text-sm transition-colors hover:bg-sidebar-accent",
+                  "group flex w-full min-w-0 items-center gap-2 rounded px-2.5 py-2 text-left text-sm transition-colors hover:bg-sidebar-accent",
                   activeChatId === chat.id &&
                     "bg-sidebar-accent text-sidebar-accent-foreground"
                 )}
@@ -116,6 +118,7 @@ export function LeftSidebar() {
 
       <div className="border-t p-3">
         <Button
+          variant="outline"
           onClick={handleNewChat}
           className="w-full justify-start gap-2 text-xs"
           size="sm"

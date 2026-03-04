@@ -65,7 +65,7 @@ export function PersonaSelector({ personas }: { personas: Persona[] }) {
             </Button>
           </div>
         </div>
-        <ScrollArea className="max-h-[300px]">
+        <ScrollArea className="max-h-[400px]">
           <div className="p-1">
             {Object.entries(grouped).map(([category, categoryPersonas]) => (
               <div key={category}>

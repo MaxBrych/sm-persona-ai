@@ -33,7 +33,7 @@ export function MessageList({
       <div className="flex h-full items-center justify-center px-8">
         <div className="text-center space-y-6">
           <div>
-            <h2 className="text-2xl font-serif font-bold mb-2">Persona AI</h2>
+            <h2 className="text-2xl font-sans font-bold mb-2">Persona Chat</h2>
             <p className="text-sm text-muted-foreground max-w-md mx-auto">
               Wähle Personas aus und stelle Fragen zu
               Produktentscheidungen, Zielgruppenanalysen oder Content-Strategien.
