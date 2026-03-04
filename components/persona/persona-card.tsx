@@ -57,7 +57,7 @@ export function PersonaCard({
           )}
           <div>
             <h4 className="font-semibold leading-tight">{persona.name}</h4>
-            <p className="text-sm text-muted-foreground">{persona.type}</p>
+            <p className="text-xs">{persona.type}</p>
           </div>
         </div>
         <div className="flex items-center gap-1">
@@ -79,13 +79,13 @@ export function PersonaCard({
         </div>
       </div>
 
-      <p className="mt-1.5 text-sm italic">„{d.zitat}"</p>
+      <p className="mt-1.5 text-xs italic">„{d.zitat}"</p>
 
       <div className="mt-2 flex flex-wrap gap-1">
-        <Badge variant="outline" className="text-sm">
+        <Badge variant="outline" className="text-[10px]">
           {d.kurzprofil.alter}J, {d.kurzprofil.geschlecht}
         </Badge>
-        <Badge variant="outline" className="text-sm">
+        <Badge variant="outline" className="text-[10px]">
           {d.kurzprofil.beruf}
         </Badge>
       </div>
@@ -93,7 +93,7 @@ export function PersonaCard({
       <div className="mt-2.5 space-y-1">
         {d.kerneigenschaften.map((k) => (
           <div key={k.name} className="flex items-center justify-between gap-2">
-            <span className="text-sm truncate">{k.name}</span>
+            <span className="text-[10px] truncate">{k.name}</span>
             <RatingBar value={k.wert} />
           </div>
         ))}
@@ -103,7 +103,7 @@ export function PersonaCard({
         <Button
           variant="outline"
           size="sm"
-          className="mt-3 w-full text-sm"
+          className="mt-3 w-full text-xs"
           onClick={onViewProfile}
         >
           Profil anzeigen

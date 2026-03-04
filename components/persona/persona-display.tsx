@@ -21,7 +21,7 @@ export function PersonaDisplay({
   if (selectedPersonas.length === 0) {
     return (
       <div className="flex flex-1 items-center justify-center px-4 py-8">
-        <p className="text-center text-sm text-muted-foreground">
+        <p className="text-center text-xs text-muted-foreground">
           Wähle Personas aus, um deren Kontext hier anzuzeigen und als Grundlage für den
           AI-Chat zu nutzen.
         </p>
