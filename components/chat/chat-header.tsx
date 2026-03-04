@@ -1,7 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import { useAppStore } from "@/hooks/use-app-store";
+
+const FALLBACK_LOGO =
+  "https://tepsrntcystsvvtraruc.supabase.co/storage/v1/object/public/images/vercel.png";
 
 export function ChatHeader() {
   const { setActiveChatId, clearPersonas, setRightSidebarOpen } = useAppStore();
@@ -18,10 +20,16 @@ export function ChatHeader() {
         onClick={handleLogoClick}
         className="flex items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer"
       >
-        <picture>
-          <source srcSet="/logo.svg" type="image/svg+xml" />
-          <Image src="/logo.png" alt="Logo" width={24} height={24} />
-        </picture>
+        <img
+          src="/logo.svg"
+          alt="Logo"
+          width={32}
+          height={32}
+          onError={(e) => {
+            e.currentTarget.onerror = null;
+            e.currentTarget.src = FALLBACK_LOGO;
+          }}
+        />
         <h1 className="text-sm font-semibold">Schwäbisch Media</h1>
       </button>
     </div>

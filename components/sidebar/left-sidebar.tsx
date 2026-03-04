@@ -1,8 +1,18 @@
 "use client";
 
+import { useState } from "react";
 import { Plus, MessageSquare, Trash2, PanelLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
 import { useChats } from "@/hooks/use-chats";
 import { useAppStore } from "@/hooks/use-app-store";
 import { cn } from "@/lib/utils";
@@ -13,6 +23,7 @@ export function LeftSidebar({ isOpen: isOpenProp }: { isOpen?: boolean }) {
   const { activeChatId, setActiveChatId, leftSidebarOpen, toggleLeftSidebar, clearPersonas, setRightSidebarOpen } =
     useAppStore();
   const isOpen = isOpenProp ?? leftSidebarOpen;
+  const [deletingChatId, setDeletingChatId] = useState<string | null>(null);
 
   const handleNewChat = () => {
     setActiveChatId(null);
@@ -20,12 +31,18 @@ export function LeftSidebar({ isOpen: isOpenProp }: { isOpen?: boolean }) {
     setRightSidebarOpen(false);
   };
 
-  const handleDeleteChat = async (e: React.MouseEvent, chatId: string) => {
+  const handleDeleteChat = (e: React.MouseEvent, chatId: string) => {
     e.stopPropagation();
-    await deleteChat(chatId);
-    if (activeChatId === chatId) {
+    setDeletingChatId(chatId);
+  };
+
+  const confirmDelete = async () => {
+    if (!deletingChatId) return;
+    await deleteChat(deletingChatId);
+    if (activeChatId === deletingChatId) {
       setActiveChatId(null);
     }
+    setDeletingChatId(null);
   };
 
   const handleChatClick = (chatId: string) => {
@@ -115,7 +132,7 @@ export function LeftSidebar({ isOpen: isOpenProp }: { isOpen?: boolean }) {
                   role="button"
                   tabIndex={0}
                   onClick={(e) => handleDeleteChat(e, chat.id)}
-                  onKeyDown={(e) => { if (e.key === "Enter") handleDeleteChat(e as unknown as React.MouseEvent, chat.id); }}
+                  onKeyDown={(e) => { if (e.key === "Enter") { e.stopPropagation(); setDeletingChatId(chat.id); } }}
                   className="hidden shrink-0 rounded p-0.5 text-muted-foreground hover:text-destructive group-hover:block cursor-pointer"
                 >
                   <Trash2 className="h-3 w-3" />
@@ -137,6 +154,25 @@ export function LeftSidebar({ isOpen: isOpenProp }: { isOpen?: boolean }) {
           Neuer Chat
         </Button>
       </div>
+
+      <Dialog open={!!deletingChatId} onOpenChange={(open) => !open && setDeletingChatId(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Chat löschen?</DialogTitle>
+            <DialogDescription>
+              Dieser Chat und alle Nachrichten werden unwiderruflich gelöscht.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline" size="sm">Abbrechen</Button>
+            </DialogClose>
+            <Button variant="destructive" size="sm" onClick={confirmDelete}>
+              Löschen
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
