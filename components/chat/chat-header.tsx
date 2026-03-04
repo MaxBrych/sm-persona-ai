@@ -1,14 +1,17 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useAppStore } from "@/hooks/use-app-store";
 
 export function ChatHeader() {
+  const router = useRouter();
   const { setActiveChatId, clearPersonas, setRightSidebarOpen } = useAppStore();
 
   const handleLogoClick = () => {
     setActiveChatId(null);
     clearPersonas();
     setRightSidebarOpen(false);
+    router.push("/");
   };
 
   return (

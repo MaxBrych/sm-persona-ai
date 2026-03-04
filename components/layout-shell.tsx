@@ -3,11 +3,10 @@
 import { useEffect, useState, useCallback } from "react";
 import { useAppStore } from "@/hooks/use-app-store";
 import { LeftSidebar } from "./sidebar/left-sidebar";
-import { ChatInterface } from "./chat/chat-interface";
 import { RightSidebar } from "./sidebar/right-sidebar";
 import { cn } from "@/lib/utils";
 
-export function LayoutShell() {
+export function LayoutShell({ children }: { children: React.ReactNode }) {
   const {
     leftSidebarOpen,
     rightSidebarOpen,
@@ -58,7 +57,7 @@ export function LayoutShell() {
       </aside>
 
       <main className="flex-1 flex flex-col min-w-0">
-        <ChatInterface />
+        {children}
       </main>
 
       <aside

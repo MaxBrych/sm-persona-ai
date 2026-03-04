@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Plus, MessageSquare, Trash2, PanelLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -22,6 +23,7 @@ export function LeftSidebar({ isOpen: isOpenProp }: { isOpen?: boolean }) {
   const { chats, loading, deleteChat } = useChats();
   const { activeChatId, setActiveChatId, setSelectedPersonaIds, leftSidebarOpen, toggleLeftSidebar, clearPersonas, setRightSidebarOpen, hasUnseenChat, setHasUnseenChat } =
     useAppStore();
+  const router = useRouter();
   const isOpen = isOpenProp ?? leftSidebarOpen;
   const [deletingChatId, setDeletingChatId] = useState<string | null>(null);
 
@@ -29,6 +31,7 @@ export function LeftSidebar({ isOpen: isOpenProp }: { isOpen?: boolean }) {
     setActiveChatId(null);
     clearPersonas();
     setRightSidebarOpen(false);
+    router.push("/");
   };
 
   const handleDeleteChat = (e: React.MouseEvent, chatId: string) => {
@@ -41,12 +44,14 @@ export function LeftSidebar({ isOpen: isOpenProp }: { isOpen?: boolean }) {
     await deleteChat(deletingChatId);
     if (activeChatId === deletingChatId) {
       setActiveChatId(null);
+      router.push("/");
     }
     setDeletingChatId(null);
   };
 
   const handleChatClick = (chatId: string) => {
     setActiveChatId(chatId);
+    router.push(`/chat/${chatId}`);
     const chat = chats.find((c) => c.id === chatId);
     if (chat?.persona_ids?.length) {
       setSelectedPersonaIds(chat.persona_ids);
