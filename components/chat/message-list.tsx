@@ -5,7 +5,6 @@ import type { UIMessage } from "ai";
 import { MessageItem } from "./message-item";
 import { PersonaGrid } from "./persona-grid";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Loader2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAppStore } from "@/hooks/use-app-store";
 import type { Persona } from "@/lib/types";
@@ -75,13 +74,26 @@ export function MessageList({
         ))}
 
         {isSubmitted && (
-          <div className="flex gap-3 px-4 py-3">
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-muted">
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          <div className="flex items-center gap-3 px-4 py-3">
+            <div className="flex items-end gap-0.5">
+              {[14, 22, 14].map((h, i) => (
+                <div
+                  key={i}
+                  className="w-1.5 rounded-full bg-muted-foreground/40 animate-pulse"
+                  style={{
+                    height: h,
+                    animationDelay: `${i * 150}ms`,
+                    animationDuration: "1s",
+                  }}
+                />
+              ))}
             </div>
-            <div className="flex items-center">
-              <span className="text-sm text-muted-foreground">Denkt nach...</span>
-            </div>
+            <span
+              className="text-sm animate-shimmer bg-[length:200%_100%] bg-clip-text bg-gradient-to-r from-muted-foreground via-foreground to-muted-foreground"
+              style={{ WebkitTextFillColor: "transparent" }}
+            >
+              Denkt nach...
+            </span>
           </div>
         )}
 
