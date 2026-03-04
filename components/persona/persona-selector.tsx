@@ -30,16 +30,43 @@ export function PersonaSelector({ personas }: { personas: Persona[] }) {
   );
 
   const allSelected = selectedPersonaIds.length === personas.length;
+  const selectedPersonas = personas.filter((p) => selectedPersonaIds.includes(p.id));
 
   return (
     <Popover>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
-          className="w-full justify-between text-sm h-9"
+          className="w-full justify-between text-sm h-9 cursor-pointer"
         >
           <span className="flex items-center gap-2 truncate">
-            <Users className="h-3.5 w-3.5 shrink-0" />
+            {selectedPersonas.length === 0 ? (
+              <Users className="h-3.5 w-3.5 shrink-0" />
+            ) : selectedPersonas.length === 1 ? (
+              selectedPersonas[0].image_url ? (
+                <div className="relative h-5 w-5 shrink-0 overflow-hidden rounded-full">
+                  <Image src={selectedPersonas[0].image_url} alt={selectedPersonas[0].name} fill className="object-cover" sizes="20px" />
+                </div>
+              ) : (
+                <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-muted text-[10px] font-semibold">
+                  {selectedPersonas[0].name[0]}
+                </div>
+              )
+            ) : (
+              <div className="flex -space-x-1.5">
+                {selectedPersonas.slice(0, 4).map((p) => (
+                  <div key={p.id} className="relative h-5 w-5 shrink-0 overflow-hidden rounded-full ring-1 ring-background">
+                    {p.image_url ? (
+                      <Image src={p.image_url} alt={p.name} fill className="object-cover" sizes="20px" />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-muted text-[8px] font-semibold">
+                        {p.name[0]}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
             {selectedPersonaIds.length === 0
               ? "Personas auswählen..."
               : `${selectedPersonaIds.length} Persona${selectedPersonaIds.length !== 1 ? "s" : ""} ausgewählt`}
