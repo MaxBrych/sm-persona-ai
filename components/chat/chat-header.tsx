@@ -1,17 +1,9 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useAppStore } from "@/hooks/use-app-store";
-
 export function ChatHeader() {
-  const router = useRouter();
-  const { setActiveChatId, clearPersonas, setRightSidebarOpen } = useAppStore();
-
   const handleLogoClick = () => {
-    setActiveChatId(null);
-    clearPersonas();
-    setRightSidebarOpen(false);
-    router.push("/");
+    // Full navigation to reset all React state (including useChat's internal cache)
+    window.location.href = "/";
   };
 
   return (
