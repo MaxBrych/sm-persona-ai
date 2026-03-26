@@ -16,11 +16,13 @@ export function MessageItem({
   isStreaming,
   onRegenerate,
   activeChatId,
+  overrideContent,
 }: {
   message: UIMessage;
   isStreaming?: boolean;
   onRegenerate?: () => void;
   activeChatId?: string | null;
+  overrideContent?: string;
 }) {
   const isUser = message.role === "user";
   const [copied, setCopied] = useState(false);
@@ -58,7 +60,12 @@ export function MessageItem({
           isUser ? "max-w-[80%] flex flex-col items-end gap-2" : "max-w-none"
         )}
       >
-        {message.parts.map((part, index) => {
+        {/* When overrideContent is provided, render it instead of normal text parts */}
+        {overrideContent !== undefined && !isUser ? (
+          <div className="font-serif text-[15px] leading-relaxed">
+            <MarkdownRenderer content={overrideContent} />
+          </div>
+        ) : message.parts.map((part, index) => {
           switch (part.type) {
             case "text":
               if (!part.text) return null;

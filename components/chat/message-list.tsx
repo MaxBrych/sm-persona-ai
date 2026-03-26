@@ -5,6 +5,7 @@ import type { UIMessage } from "ai";
 import { MessageItem } from "./message-item";
 import { PersonaGrid } from "./persona-grid";
 import { DesignReviewWrapper } from "./design-review-wrapper";
+import { splitAiResponse } from "@/lib/parse-quick-takes";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Loader2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -70,24 +71,29 @@ export function MessageList({
     );
   }
 
-  // Extract AI response text for quick takes
-  const lastAssistantText = messages
-    .filter((m) => m.role === "assistant")
-    .at(-1)
-    ?.parts.filter((p): p is { type: "text"; text: string } => p.type === "text")
-    .map((p) => p.text)
-    .join("") || undefined;
-
   const resolvedActivePersonas = activePersonas ?? personas.filter((p) => selectedPersonaIds.includes(p.id));
+  const inDesignReview = !!designImageUrl && resolvedActivePersonas.length > 0;
+
+  // Extract full AI response text for the wrapper and split
+  const lastAssistantMsg = messages.filter((m) => m.role === "assistant").at(-1);
+  const lastAssistantText = lastAssistantMsg?.parts
+    .filter((p): p is { type: "text"; text: string } => p.type === "text")
+    .map((p) => p.text)
+    .join("") || "";
+
+  // Split: voices go to wrapper, rest renders below
+  const splitResult = inDesignReview && lastAssistantText
+    ? splitAiResponse(lastAssistantText, resolvedActivePersonas)
+    : null;
 
   return (
     <ScrollArea className="h-full">
       {/* Design Review Wrapper */}
-      {designImageUrl && resolvedActivePersonas.length > 0 && (
+      {inDesignReview && (
         <DesignReviewWrapper
-          imageUrl={designImageUrl}
+          imageUrl={designImageUrl!}
           personas={resolvedActivePersonas}
-          aiResponseText={lastAssistantText}
+          aiResponseText={lastAssistantText || undefined}
         />
       )}
       <div className="mx-auto max-w-3xl py-4">
@@ -95,15 +101,22 @@ export function MessageList({
           const isLastAssistant =
             message.role === "assistant" &&
             index === messages.length - 1;
+
+          // In design review mode, replace the last assistant message text
+          // with only the analysis part (voices are shown in the wrapper)
+          const overrideContent =
+            inDesignReview && isLastAssistant && splitResult?.voices.length
+              ? splitResult.rest
+              : undefined;
+
           return (
             <MessageItem
               key={message.id}
               message={message}
-              isStreaming={
-                isStreaming && isLastAssistant
-              }
+              isStreaming={isStreaming && isLastAssistant}
               onRegenerate={isLastAssistant ? onRegenerate : undefined}
               activeChatId={activeChatId}
+              overrideContent={overrideContent}
             />
           );
         })}

@@ -1,56 +1,93 @@
 import type { Persona } from "./types";
 
-export interface QuickTake {
+export interface PersonaVoice {
   personaId: string;
   name: string;
-  text: string;
+  type: string;
+  markdown: string;
+}
+
+export interface SplitResponse {
+  voices: PersonaVoice[];
+  rest: string;
 }
 
 /**
- * Extract the first sentence of each persona's feedback from the AI markdown response.
- * Looks for bold persona names (**Name**) or heading patterns (### Name).
+ * Split the AI markdown response into persona voices ("Stimmen vom Tisch")
+ * and the remaining analysis sections.
  */
-export function parseQuickTakes(
+export function splitAiResponse(
   markdown: string,
   personas: Persona[]
-): QuickTake[] {
-  if (!markdown || personas.length === 0) return [];
-
-  const takes: QuickTake[] = [];
-
-  for (const persona of personas) {
-    // Match patterns like **Niklas**, ### Niklas, **Niklas (Neokultureller)**
-    const escaped = persona.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    const pattern = new RegExp(
-      `(?:\\*\\*${escaped}[^*]*\\*\\*|###?\\s*${escaped}[^\\n]*)\\s*[:\\n]?\\s*([^\\n]+)`,
-      "i"
-    );
-    const match = markdown.match(pattern);
-
-    if (match?.[1]) {
-      // Extract first sentence (up to first period, exclamation, or question mark)
-      const firstSentence = match[1]
-        .replace(/^\s*[:\-–—]\s*/, "")
-        .match(/^[^.!?]+[.!?]?/)?.[0]
-        ?.trim();
-
-      if (firstSentence && firstSentence.length > 5) {
-        takes.push({
-          personaId: persona.id,
-          name: persona.name,
-          text: firstSentence,
-        });
-        continue;
-      }
-    }
-
-    // Fallback: no match found
-    takes.push({
-      personaId: persona.id,
-      name: persona.name,
-      text: "...",
-    });
+): SplitResponse {
+  if (!markdown || personas.length === 0) {
+    return { voices: [], rest: markdown || "" };
   }
 
-  return takes;
+  // Find the "Stimmen vom Tisch" section
+  const stimmenMatch = markdown.match(
+    /###?\s*Stimmen vom Tisch\s*\n/i
+  );
+
+  if (!stimmenMatch || stimmenMatch.index === undefined) {
+    // Single persona format or no section found — return as-is
+    return { voices: [], rest: markdown };
+  }
+
+  const stimmenStart = stimmenMatch.index + stimmenMatch[0].length;
+
+  // Find the next ### heading after Stimmen vom Tisch
+  const afterStimmen = markdown.slice(stimmenStart);
+  const nextSectionMatch = afterStimmen.match(/\n###?\s+(?!Stimmen)/);
+  const stimmenEnd = nextSectionMatch?.index !== undefined
+    ? stimmenStart + nextSectionMatch.index
+    : markdown.length;
+
+  const stimmenBlock = markdown.slice(stimmenStart, stimmenEnd).trim();
+  const rest = nextSectionMatch?.index !== undefined
+    ? markdown.slice(stimmenEnd).trim()
+    : "";
+
+  // Parse individual persona blocks from the Stimmen section
+  const voices: PersonaVoice[] = [];
+
+  for (const persona of personas) {
+    const escaped = persona.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    // Match **Name** (Type): or **Name (Type):**
+    const pattern = new RegExp(
+      `\\*\\*${escaped}\\*\\*\\s*\\([^)]+\\)\\s*:?|\\*\\*${escaped}\\s*\\([^)]+\\)\\s*\\*\\*\\s*:?`,
+      "i"
+    );
+    const match = stimmenBlock.match(pattern);
+
+    if (match && match.index !== undefined) {
+      const blockStart = match.index + match[0].length;
+
+      // Find the next persona block or end of section
+      let blockEnd = stimmenBlock.length;
+      for (const otherPersona of personas) {
+        if (otherPersona.id === persona.id) continue;
+        const otherEscaped = otherPersona.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        const otherPattern = new RegExp(
+          `\\*\\*${otherEscaped}\\*\\*\\s*\\(|\\*\\*${otherEscaped}\\s*\\(`,
+          "i"
+        );
+        const otherMatch = stimmenBlock.slice(blockStart).match(otherPattern);
+        if (otherMatch?.index !== undefined && blockStart + otherMatch.index < blockEnd) {
+          blockEnd = blockStart + otherMatch.index;
+        }
+      }
+
+      const blockText = stimmenBlock.slice(blockStart, blockEnd).trim();
+
+      voices.push({
+        personaId: persona.id,
+        name: persona.name,
+        type: persona.type,
+        markdown: blockText,
+      });
+    }
+  }
+
+  return { voices, rest };
 }
