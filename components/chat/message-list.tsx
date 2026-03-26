@@ -117,6 +117,7 @@ export function MessageList({
               onRegenerate={isLastAssistant ? onRegenerate : undefined}
               activeChatId={activeChatId}
               overrideContent={overrideContent}
+              hideImages={inDesignReview && message.role === "user"}
             />
           );
         })}

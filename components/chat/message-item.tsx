@@ -17,12 +17,14 @@ export function MessageItem({
   onRegenerate,
   activeChatId,
   overrideContent,
+  hideImages,
 }: {
   message: UIMessage;
   isStreaming?: boolean;
   onRegenerate?: () => void;
   activeChatId?: string | null;
   overrideContent?: string;
+  hideImages?: boolean;
 }) {
   const isUser = message.role === "user";
   const [copied, setCopied] = useState(false);
@@ -93,6 +95,7 @@ export function MessageItem({
                 />
               );
             case "file":
+              if (hideImages && part.mediaType?.startsWith("image/")) return null;
               if (part.mediaType?.startsWith("image/")) {
                 const isLoaded = loadedImages.has(index);
                 return (
