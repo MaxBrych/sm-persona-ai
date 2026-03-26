@@ -14,7 +14,7 @@ import { ChatHeader } from "./chat-header";
 export function ChatInterface({ chatId }: { chatId: string | null }) {
   useChatSync(chatId);
 
-  const { activeChatId, selectedPersonaIds, selectedModel, setActiveChatId, setSelectedPersonaIds, setRightSidebarOpen, setHasUnseenChat, bumpChatListVersion } =
+  const { activeChatId, selectedPersonaIds, selectedModel, setActiveChatId, setSelectedPersonaIds, setHasUnseenChat, bumpChatListVersion } =
     useAppStore();
   const { personas, loading: personasLoading } = usePersonas();
 
@@ -129,12 +129,11 @@ export function ChatInterface({ chatId }: { chatId: string | null }) {
 
       if (chatData?.persona_ids?.length) {
         setSelectedPersonaIds(chatData.persona_ids);
-        setRightSidebarOpen(true);
       }
     };
 
     loadChat();
-  }, [activeChatId, setMessages, setSelectedPersonaIds, setRightSidebarOpen]);
+  }, [activeChatId, setMessages, setSelectedPersonaIds]);
 
   const handleSend = useCallback(
     async (msg: { text: string; files?: File[] }) => {

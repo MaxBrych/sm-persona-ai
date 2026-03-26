@@ -8,21 +8,11 @@ import { cn } from "@/lib/utils";
 import type { Persona } from "@/lib/types";
 
 export function PersonaGrid({ personas }: { personas: Persona[] }) {
-  const {
-    selectedPersonaIds,
-    togglePersona,
-    rightSidebarOpen,
-    setRightSidebarOpen,
-  } = useAppStore();
+  const { selectedPersonaIds, togglePersona } = useAppStore();
   const [hoveredId, setHoveredId] = useState<string | null>(null);
 
   const handleToggle = (id: string) => {
-    const wasEmpty = selectedPersonaIds.length === 0;
-    const isRemoving = selectedPersonaIds.includes(id);
     togglePersona(id);
-    if (wasEmpty && !isRemoving && !rightSidebarOpen) {
-      setRightSidebarOpen(true);
-    }
   };
 
   return (

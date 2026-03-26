@@ -55,7 +55,6 @@ export function LeftSidebar({ isOpen: isOpenProp }: { isOpen?: boolean }) {
     const chat = chats.find((c) => c.id === chatId);
     if (chat?.persona_ids?.length) {
       setSelectedPersonaIds(chat.persona_ids);
-      setRightSidebarOpen(true);
     }
   };
 
