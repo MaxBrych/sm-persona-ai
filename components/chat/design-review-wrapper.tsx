@@ -76,14 +76,13 @@ export function DesignReviewWrapper({
     setScale((prev) => Math.min(Math.max(prev * delta, 0.5), 5));
   }, []);
 
-  // Pan with mouse drag
+  // Pan with mouse drag (always enabled, like Figma)
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    if (scale <= 1) return;
     e.preventDefault();
     setIsPanning(true);
     panStart.current = { x: e.clientX, y: e.clientY };
     translateStart.current = { ...translate };
-  }, [scale, translate]);
+  }, [translate]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (!isPanning) return;
@@ -180,8 +179,7 @@ export function DesignReviewWrapper({
             <div
               ref={canvasRef}
               className={cn(
-                "flex-1 relative overflow-hidden",
-                scale > 1 ? "cursor-grab" : "cursor-zoom-in",
+                "flex-1 relative overflow-hidden cursor-grab",
                 isPanning && "cursor-grabbing"
               )}
               style={{
@@ -234,7 +232,7 @@ export function DesignReviewWrapper({
                 Stimmen vom Tisch
               </span>
             </div>
-            <ScrollArea className="flex-1">
+            <ScrollArea className="flex-1 min-h-0">
               <div className="p-3 space-y-3">
                 {voices.length > 0
                   ? voices.map((voice) => {
@@ -267,17 +265,15 @@ export function DesignReviewWrapper({
                           </div>
                           {/* Comment body */}
                           <div className="min-w-0 flex-1">
-                            <div className="inline">
-                              <span
-                                className="text-[13px] font-semibold mr-1.5"
-                                style={{ color }}
-                              >
-                                {voice.name}
-                              </span>
-                              <span className="text-[13px] text-foreground leading-relaxed">
-                                {cleanVoiceText(voice.markdown)}
-                              </span>
-                            </div>
+                            <span
+                              className="text-[13px] font-semibold block mb-0.5"
+                              style={{ color }}
+                            >
+                              {voice.name}
+                            </span>
+                            <span className="text-[13px] text-foreground leading-relaxed">
+                              {cleanVoiceText(voice.markdown)}
+                            </span>
                           </div>
                         </div>
                       );
