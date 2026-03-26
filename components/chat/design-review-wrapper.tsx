@@ -25,17 +25,17 @@ function getPersonaColor(index: number): string {
 }
 
 export function DesignReviewWrapper({
-  imageUrl,
+  imageUrls,
   personas,
   aiResponseText,
 }: {
-  imageUrl: string;
+  imageUrls: string[];
   personas: Persona[];
   aiResponseText?: string;
 }) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [showStickyHeader, setShowStickyHeader] = useState(false);
-  const [imageLoaded, setImageLoaded] = useState(false);
+  const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
 
   // Zoom/pan state
   const canvasRef = useRef<HTMLDivElement>(null);
@@ -77,20 +77,26 @@ export function DesignReviewWrapper({
   }, []);
 
   // Pan with mouse drag (always enabled, like Figma)
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsPanning(true);
-    panStart.current = { x: e.clientX, y: e.clientY };
-    translateStart.current = { ...translate };
-  }, [translate]);
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      setIsPanning(true);
+      panStart.current = { x: e.clientX, y: e.clientY };
+      translateStart.current = { ...translate };
+    },
+    [translate]
+  );
 
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    if (!isPanning) return;
-    setTranslate({
-      x: translateStart.current.x + (e.clientX - panStart.current.x),
-      y: translateStart.current.y + (e.clientY - panStart.current.y),
-    });
-  }, [isPanning]);
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent) => {
+      if (!isPanning) return;
+      setTranslate({
+        x: translateStart.current.x + (e.clientX - panStart.current.x),
+        y: translateStart.current.y + (e.clientY - panStart.current.y),
+      });
+    },
+    [isPanning]
+  );
 
   const handleMouseUp = useCallback(() => {
     setIsPanning(false);
@@ -104,9 +110,11 @@ export function DesignReviewWrapper({
 
   // Strip blockquote markers from voice markdown for plain text rendering
   const cleanVoiceText = (markdown: string) => {
-    return markdown
-      .replace(/^>\s*/gm, "") // Remove blockquote markers
-      .trim();
+    return markdown.replace(/^>\s*/gm, "").trim();
+  };
+
+  const onImageLoad = (index: number) => {
+    setLoadedImages((prev) => new Set(prev).add(index));
   };
 
   return (
@@ -120,13 +128,20 @@ export function DesignReviewWrapper({
             : "opacity-0 -translate-y-full pointer-events-none"
         )}
       >
-        {/* Thumbnail */}
-        <div className="h-8 w-12 rounded overflow-hidden flex-shrink-0 border border-border">
-          <img
-            src={imageUrl}
-            alt="Design"
-            className="w-full h-full object-cover"
-          />
+        {/* Thumbnails */}
+        <div className="flex gap-1 flex-shrink-0">
+          {imageUrls.map((url, i) => (
+            <div
+              key={url}
+              className="h-8 w-12 rounded overflow-hidden border border-border flex-shrink-0"
+            >
+              <img
+                src={url}
+                alt={`Design ${i + 1}`}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          ))}
         </div>
 
         {/* Stacked persona avatars */}
@@ -174,7 +189,7 @@ export function DesignReviewWrapper({
           className="flex flex-col md:flex-row"
           style={{ height: "clamp(300px, 50vh, 500px)" }}
         >
-          {/* Left: Zoomable Design Canvas */}
+          {/* Left: Zoomable Design Canvas with multiple images */}
           <div className="flex-1 min-w-0 border-r border-border flex flex-col">
             <div
               ref={canvasRef}
@@ -184,7 +199,8 @@ export function DesignReviewWrapper({
               )}
               style={{
                 backgroundColor: "#f5f5f5",
-                backgroundImage: "radial-gradient(circle, #d0d0d0 1px, transparent 1px)",
+                backgroundImage:
+                  "radial-gradient(circle, #d0d0d0 1px, transparent 1px)",
                 backgroundSize: "20px 20px",
               }}
               onWheel={handleWheel}
@@ -195,25 +211,32 @@ export function DesignReviewWrapper({
               onDoubleClick={handleDoubleClick}
             >
               <div
-                className="w-full h-full flex items-center justify-center transition-transform"
+                className="w-full h-full flex items-center justify-center gap-4 p-4 transition-transform"
                 style={{
                   transform: `translate(${translate.x}px, ${translate.y}px) scale(${scale})`,
                   transitionDuration: isPanning ? "0ms" : "150ms",
                 }}
               >
-                {!imageLoaded && (
-                  <Skeleton className="absolute inset-4 rounded-lg" />
-                )}
-                <img
-                  src={imageUrl}
-                  alt="Design for review"
-                  className={cn(
-                    "max-w-[95%] max-h-[95%] object-contain rounded-lg shadow-2xl transition-opacity duration-300 select-none",
-                    imageLoaded ? "opacity-100" : "opacity-0"
-                  )}
-                  onLoad={() => setImageLoaded(true)}
-                  draggable={false}
-                />
+                {imageUrls.map((url, i) => (
+                  <div key={url} className="relative flex-shrink-0">
+                    {!loadedImages.has(i) && (
+                      <Skeleton className="h-[90%] w-48 rounded-lg absolute inset-0" />
+                    )}
+                    <img
+                      src={url}
+                      alt={`Design ${i + 1}`}
+                      className={cn(
+                        "max-h-[calc(100%-2rem)] object-contain rounded-lg shadow-2xl transition-opacity duration-300 select-none",
+                        loadedImages.has(i) ? "opacity-100" : "opacity-0"
+                      )}
+                      style={{
+                        maxHeight: "clamp(260px, 45vh, 460px)",
+                      }}
+                      onLoad={() => onImageLoad(i)}
+                      draggable={false}
+                    />
+                  </div>
+                ))}
               </div>
 
               {/* Zoom indicator */}
@@ -239,11 +262,15 @@ export function DesignReviewWrapper({
                       const persona = personas.find(
                         (p) => p.id === voice.personaId
                       );
-                      const color = getPersonaColor(
-                        personas.findIndex((p) => p.id === voice.personaId)
+                      const personaIndex = personas.findIndex(
+                        (p) => p.id === voice.personaId
                       );
+                      const color = getPersonaColor(personaIndex);
                       return (
-                        <div key={voice.personaId} className="flex gap-2.5 items-start">
+                        <div
+                          key={voice.personaId}
+                          className="flex gap-2.5 items-start"
+                        >
                           {/* Avatar */}
                           <div
                             className="w-7 h-7 rounded-full flex-shrink-0 overflow-hidden mt-0.5"
@@ -265,10 +292,7 @@ export function DesignReviewWrapper({
                           </div>
                           {/* Comment body */}
                           <div className="min-w-0 flex-1">
-                            <span
-                              className="text-[13px] font-semibold block mb-0.5"
-                              style={{ color }}
-                            >
+                            <span className="text-[13px] font-semibold text-foreground block mb-0.5">
                               {voice.name}
                             </span>
                             <span className="text-[13px] text-foreground leading-relaxed">
@@ -281,7 +305,10 @@ export function DesignReviewWrapper({
                   : personas.map((persona, i) => {
                       const color = getPersonaColor(i);
                       return (
-                        <div key={persona.id} className="flex gap-2.5 items-start">
+                        <div
+                          key={persona.id}
+                          className="flex gap-2.5 items-start"
+                        >
                           <div
                             className="w-7 h-7 rounded-full flex-shrink-0 overflow-hidden"
                             style={{ backgroundColor: color }}
@@ -301,10 +328,7 @@ export function DesignReviewWrapper({
                             )}
                           </div>
                           <div className="min-w-0 flex-1">
-                            <span
-                              className="text-[13px] font-semibold mr-1.5"
-                              style={{ color }}
-                            >
+                            <span className="text-[13px] font-semibold text-foreground mr-1.5">
                               {persona.name}
                             </span>
                             <Skeleton className="h-3 w-full mt-1 inline-block" />

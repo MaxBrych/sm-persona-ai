@@ -20,7 +20,7 @@ export function MessageList({
   onRegenerate,
   activeChatId,
   optimisticMessage,
-  designImageUrl,
+  designImageUrls,
   activePersonas,
 }: {
   messages: UIMessage[];
@@ -30,7 +30,7 @@ export function MessageList({
   onRegenerate?: () => void;
   activeChatId?: string | null;
   optimisticMessage?: { text: string; filePreviews: string[] } | null;
-  designImageUrl?: string | null;
+  designImageUrls?: string[];
   activePersonas?: Persona[];
 }) {
   const { selectedPersonaIds } = useAppStore();
@@ -43,7 +43,7 @@ export function MessageList({
   const isStreaming = status === "streaming";
   const isSubmitted = status === "submitted";
 
-  if (messages.length === 0 && !optimisticMessage && !designImageUrl) {
+  if (messages.length === 0 && !optimisticMessage && (!designImageUrls || designImageUrls.length === 0)) {
     return (
       <div className="flex h-full items-center justify-center px-8">
         <div className="text-center space-y-6">
@@ -72,7 +72,7 @@ export function MessageList({
   }
 
   const resolvedActivePersonas = activePersonas ?? personas.filter((p) => selectedPersonaIds.includes(p.id));
-  const inDesignReview = !!designImageUrl && resolvedActivePersonas.length > 0;
+  const inDesignReview = !!(designImageUrls && designImageUrls.length > 0) && resolvedActivePersonas.length > 0;
 
   // Extract full AI response text for the wrapper and split
   const lastAssistantMsg = messages.filter((m) => m.role === "assistant").at(-1);
@@ -91,7 +91,7 @@ export function MessageList({
       {/* Design Review Wrapper */}
       {inDesignReview && (
         <DesignReviewWrapper
-          imageUrl={designImageUrl!}
+          imageUrls={designImageUrls!}
           personas={resolvedActivePersonas}
           aiResponseText={lastAssistantText || undefined}
         />

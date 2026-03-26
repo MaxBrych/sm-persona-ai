@@ -28,7 +28,7 @@ export function ChatInterface({ chatId }: { chatId: string | null }) {
     text: string;
     filePreviews: string[];
   } | null>(null);
-  const [designImageUrl, setDesignImageUrl] = useState<string | null>(null);
+  const [designImageUrls, setDesignImageUrls] = useState<string[]>([]);
 
   // Generate a unique session ID for each "new chat" to avoid stale useChat cache
   const [newSessionId, setNewSessionId] = useState(() => crypto.randomUUID());
@@ -95,7 +95,7 @@ export function ChatInterface({ chatId }: { chatId: string | null }) {
 
     if (!activeChatId) {
       setMessages([]);
-      setDesignImageUrl(null);
+      setDesignImageUrls([]);
       // Generate a fresh session ID so useChat starts with empty message cache
       setNewSessionId(crypto.randomUUID());
       return;
@@ -120,29 +120,20 @@ export function ChatInterface({ chatId }: { chatId: string | null }) {
         setMessages(uiMessages);
 
         // Detect design images from existing messages for Design Review Mode
-        const firstImageMsg = messagesData.find(
-          (m) =>
-            m.role === "user" &&
-            Array.isArray(m.parts) &&
-            m.parts.some(
-              (p: { type?: string; mediaType?: string }) =>
-                p.type === "file" && p.mediaType?.startsWith("image/")
-            )
-        );
-        if (firstImageMsg && Array.isArray(firstImageMsg.parts)) {
-          const imgPart = firstImageMsg.parts.find(
-            (p: { type?: string; mediaType?: string }) =>
-              p.type === "file" && p.mediaType?.startsWith("image/")
-          ) as { url?: string } | undefined;
-          if (imgPart?.url) {
-            setDesignImageUrl(imgPart.url);
+        const allImageUrls: string[] = [];
+        for (const m of messagesData) {
+          if (m.role === "user" && Array.isArray(m.parts)) {
+            for (const p of m.parts as Array<{ type?: string; mediaType?: string; url?: string }>) {
+              if (p.type === "file" && p.mediaType?.startsWith("image/") && p.url) {
+                allImageUrls.push(p.url);
+              }
+            }
           }
-        } else {
-          setDesignImageUrl(null);
         }
+        setDesignImageUrls(allImageUrls);
       } else {
         setMessages([]);
-        setDesignImageUrl(null);
+        setDesignImageUrls([]);
       }
 
       // Restore personas from chat record (needed for direct URL access)
@@ -287,7 +278,7 @@ export function ChatInterface({ chatId }: { chatId: string | null }) {
           onRegenerate={regenerate}
           activeChatId={activeChatId}
           optimisticMessage={optimisticMessage}
-          designImageUrl={designImageUrl}
+          designImageUrls={designImageUrls}
           activePersonas={activePersonas}
         />
       </div>
@@ -295,8 +286,8 @@ export function ChatInterface({ chatId }: { chatId: string | null }) {
         onSend={handleSend}
         status={status}
         onStop={stop}
-        onImageAttach={(_file, previewUrl) => setDesignImageUrl(previewUrl)}
-        onImageRemove={() => setDesignImageUrl(null)}
+        onImageAttach={(_files, previewUrls) => setDesignImageUrls(previewUrls)}
+        onImageRemove={() => setDesignImageUrls([])}
       />
     </div>
   );
