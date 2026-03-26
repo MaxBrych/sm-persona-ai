@@ -176,14 +176,19 @@ export function DesignReviewWrapper({
           style={{ height: "clamp(300px, 50vh, 500px)" }}
         >
           {/* Left: Zoomable Design Canvas */}
-          <div className="flex-1 min-w-0 border-r border-border flex flex-col bg-black/20">
+          <div className="flex-1 min-w-0 border-r border-border flex flex-col">
             <div
               ref={canvasRef}
               className={cn(
-                "flex-1 relative overflow-hidden bg-gradient-to-br from-background via-muted/30 to-background",
+                "flex-1 relative overflow-hidden",
                 scale > 1 ? "cursor-grab" : "cursor-zoom-in",
                 isPanning && "cursor-grabbing"
               )}
+              style={{
+                backgroundColor: "#f5f5f5",
+                backgroundImage: "radial-gradient(circle, #d0d0d0 1px, transparent 1px)",
+                backgroundSize: "20px 20px",
+              }}
               onWheel={handleWheel}
               onMouseDown={handleMouseDown}
               onMouseMove={handleMouseMove}
@@ -223,7 +228,7 @@ export function DesignReviewWrapper({
           </div>
 
           {/* Right: Persona Voices as chat comments */}
-          <div className="flex-1 min-w-0 flex flex-col bg-background md:max-w-[50%]">
+          <div className="flex-1 min-w-0 min-h-0 flex flex-col bg-background md:max-w-[50%] overflow-hidden">
             <div className="px-3 py-2 border-b border-border">
               <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-medium">
                 Stimmen vom Tisch
