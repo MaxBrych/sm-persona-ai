@@ -129,11 +129,11 @@ export function ChatInput({
   };
 
   return (
-    <div className="bg-background px-4 pb-4 pt-2">
+    <div className="bg-background px-4 pb-2 pt-1">
       <div className="mx-auto max-w-3xl">
         <div
           className={cn(
-            "rounded-2xl border bg-muted px-4 pt-3 pb-2 transition-colors",
+            "rounded-2xl border bg-muted px-4 pt-2 pb-1.5 transition-colors",
             !hasPersonas && "opacity-60",
             isDragging && "border-primary border-dashed bg-primary/5"
           )}
@@ -183,7 +183,7 @@ export function ChatInput({
             onPaste={handlePaste}
             placeholder={hasPersonas ? "Frage stellen... (⌘+Enter zum Senden)" : "Personas auswählen..."}
             disabled={!hasPersonas}
-            className="min-h-[44px] max-h-[200px] resize-none border-0 bg-transparent p-0 text-sm shadow-none focus-visible:ring-0 disabled:cursor-not-allowed"
+            className="min-h-[36px] max-h-[160px] resize-none border-0 bg-transparent p-0 text-sm shadow-none focus-visible:ring-0 disabled:cursor-not-allowed"
             rows={1}
           />
 
@@ -196,7 +196,7 @@ export function ChatInput({
             multiple
           />
 
-          <div className="flex items-center justify-between pt-2">
+          <div className="flex items-center justify-between pt-1">
             <Button
               variant="outline"
               size="icon"
@@ -248,7 +248,7 @@ export function ChatInput({
           </div>
         </div>
 
-        <p className="mt-2 text-center text-[11px] text-muted-foreground">
+        <p className="mt-1 text-center text-[11px] text-muted-foreground">
           KI kann Fehler machen. Überprüfe wichtige Informationen.
         </p>
       </div>

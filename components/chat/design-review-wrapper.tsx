@@ -152,10 +152,10 @@ export function DesignReviewWrapper({
 
   return (
     <>
-      {/* Sticky Header Bar (48px) */}
+      {/* Sticky Header Bar (48px) — fixed position so it doesn't take up flow space */}
       <div
         className={cn(
-          "sticky top-0 z-50 h-12 border-b border-border bg-background/95 backdrop-blur-sm transition-all duration-300 flex items-center px-4 gap-3",
+          "fixed top-0 left-0 right-0 z-50 h-12 border-b border-border bg-background/95 backdrop-blur-sm transition-all duration-300 flex items-center px-4 gap-3",
           showStickyHeader
             ? "opacity-100 translate-y-0"
             : "opacity-0 -translate-y-full pointer-events-none"
@@ -221,7 +221,7 @@ export function DesignReviewWrapper({
         <div
           ref={containerRef}
           className="relative"
-          style={{ height: "clamp(300px, 50vh, 500px)" }}
+          style={{ height: "clamp(400px, 60vh, 700px)" }}
         >
           {/* Full-width Zoomable Design Canvas */}
           <div
@@ -263,7 +263,7 @@ export function DesignReviewWrapper({
                       loadedImages.has(i) ? "opacity-100" : "opacity-0"
                     )}
                     style={{
-                      maxHeight: "clamp(260px, 45vh, 460px)",
+                      maxHeight: "clamp(360px, 55vh, 660px)",
                     }}
                     onLoad={() => onImageLoad(i)}
                     draggable={false}
@@ -282,7 +282,7 @@ export function DesignReviewWrapper({
 
           {/* Overlaid Discussion Panel */}
           <div
-            className="absolute top-3 right-3 bottom-3 flex flex-col bg-background/95 backdrop-blur-sm rounded-xl border border-border shadow-lg overflow-hidden"
+            className="absolute top-3 right-5 bottom-3 flex flex-col bg-background/95 backdrop-blur-sm rounded-xl border border-border shadow-lg overflow-hidden"
             style={{ width: panelWidth }}
           >
             {/* Resize handle (left edge) */}
