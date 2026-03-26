@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import type { UIMessage } from "ai";
 import { RefreshCw, Copy, Check, ThumbsUp, ThumbsDown } from "lucide-react";
 import { useState } from "react";
@@ -11,20 +10,15 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { MarkdownRenderer } from "./markdown-renderer";
 import { ThinkingIndicator } from "./thinking-indicator";
 import { cn } from "@/lib/utils";
-import type { Persona } from "@/lib/types";
 
 export function MessageItem({
   message,
   isStreaming,
-  personas,
-  selectedPersonaIds,
   onRegenerate,
   activeChatId,
 }: {
   message: UIMessage;
   isStreaming?: boolean;
-  personas?: Persona[];
-  selectedPersonaIds?: string[];
   onRegenerate?: () => void;
   activeChatId?: string | null;
 }) {
@@ -52,11 +46,6 @@ export function MessageItem({
       .eq("content", messageContent);
   };
 
-  const selectedPersonas =
-    isUser && personas && selectedPersonaIds
-      ? personas.filter((p) => selectedPersonaIds.includes(p.id))
-      : [];
-
   return (
     <div
       className={cn(
@@ -64,30 +53,6 @@ export function MessageItem({
         isUser ? "flex flex-col items-end" : ""
       )}
     >
-      {selectedPersonas.length > 0 && (
-        <div className="flex -space-x-2 mb-1.5 mr-1">
-          {selectedPersonas.map((persona) => (
-            <div
-              key={persona.id}
-              className="relative h-6 w-6 rounded-full ring-2 ring-background overflow-hidden bg-muted"
-            >
-              {persona.image_url ? (
-                <Image
-                  src={persona.image_url}
-                  alt={persona.name}
-                  fill
-                  className="object-cover"
-                  sizes="24px"
-                />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center text-[10px] font-medium text-muted-foreground">
-                  {persona.name[0]}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
       <div
         className={cn(
           isUser ? "max-w-[80%] flex flex-col items-end gap-2" : "max-w-none"

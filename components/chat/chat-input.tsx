@@ -19,10 +19,14 @@ export function ChatInput({
   onSend,
   status,
   onStop,
+  onImageAttach,
+  onImageRemove,
 }: {
   onSend: (msg: { text: string; files?: File[] }) => void;
   status: string;
   onStop: () => void;
+  onImageAttach?: (file: File, previewUrl: string) => void;
+  onImageRemove?: () => void;
 }) {
   const [input, setInput] = useState("");
   const [files, setFiles] = useState<File[]>([]);
@@ -47,11 +51,22 @@ export function ChatInput({
     const imageFiles = newFiles.filter((f) => f.type.startsWith("image/"));
     if (imageFiles.length > 0) {
       setFiles((prev) => [...prev, ...imageFiles]);
+      // Notify parent of first image for Design Review Mode
+      if (onImageAttach) {
+        const previewUrl = URL.createObjectURL(imageFiles[0]);
+        onImageAttach(imageFiles[0], previewUrl);
+      }
     }
   };
 
   const removeFile = (index: number) => {
-    setFiles((prev) => prev.filter((_, i) => i !== index));
+    setFiles((prev) => {
+      const next = prev.filter((_, i) => i !== index);
+      if (next.length === 0 && onImageRemove) {
+        onImageRemove();
+      }
+      return next;
+    });
   };
 
   const handleSend = () => {

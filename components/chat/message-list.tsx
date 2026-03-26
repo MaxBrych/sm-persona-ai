@@ -1,10 +1,10 @@
 "use client";
 
 import { useRef, useEffect } from "react";
-import Image from "next/image";
 import type { UIMessage } from "ai";
 import { MessageItem } from "./message-item";
 import { PersonaGrid } from "./persona-grid";
+import { DesignReviewWrapper } from "./design-review-wrapper";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Loader2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -19,6 +19,8 @@ export function MessageList({
   onRegenerate,
   activeChatId,
   optimisticMessage,
+  designImageUrl,
+  activePersonas,
 }: {
   messages: UIMessage[];
   status: string;
@@ -27,6 +29,8 @@ export function MessageList({
   onRegenerate?: () => void;
   activeChatId?: string | null;
   optimisticMessage?: { text: string; filePreviews: string[] } | null;
+  designImageUrl?: string | null;
+  activePersonas?: Persona[];
 }) {
   const { selectedPersonaIds } = useAppStore();
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -38,7 +42,7 @@ export function MessageList({
   const isStreaming = status === "streaming";
   const isSubmitted = status === "submitted";
 
-  if (messages.length === 0 && !optimisticMessage) {
+  if (messages.length === 0 && !optimisticMessage && !designImageUrl) {
     return (
       <div className="flex h-full items-center justify-center px-8">
         <div className="text-center space-y-6">
@@ -66,31 +70,27 @@ export function MessageList({
     );
   }
 
-  const activePersonas = personas.filter((p) => selectedPersonaIds.includes(p.id));
+  // Extract AI response text for quick takes
+  const lastAssistantText = messages
+    .filter((m) => m.role === "assistant")
+    .at(-1)
+    ?.parts.filter((p): p is { type: "text"; text: string } => p.type === "text")
+    .map((p) => p.text)
+    .join("") || undefined;
+
+  const resolvedActivePersonas = activePersonas ?? personas.filter((p) => selectedPersonaIds.includes(p.id));
 
   return (
     <ScrollArea className="h-full">
+      {/* Design Review Wrapper */}
+      {designImageUrl && resolvedActivePersonas.length > 0 && (
+        <DesignReviewWrapper
+          imageUrl={designImageUrl}
+          personas={resolvedActivePersonas}
+          aiResponseText={lastAssistantText}
+        />
+      )}
       <div className="mx-auto max-w-3xl py-4">
-        {activePersonas.length > 0 && (
-          <div className="flex items-center gap-1 px-4 pb-3">
-            <div className="flex -space-x-2">
-              {activePersonas.map((p) => (
-                <div key={p.id} className="relative h-7 w-7 shrink-0 overflow-hidden rounded-full ring-2 ring-background">
-                  {p.image_url ? (
-                    <Image src={p.image_url} alt={p.name} fill className="object-cover" sizes="28px" />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-muted text-xs font-semibold">
-                      {p.name[0]}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-            <span className="text-xs text-muted-foreground ml-1">
-              {activePersonas.map((p) => p.name).join(", ")}
-            </span>
-          </div>
-        )}
         {messages.map((message, index) => {
           const isLastAssistant =
             message.role === "assistant" &&
@@ -99,8 +99,6 @@ export function MessageList({
             <MessageItem
               key={message.id}
               message={message}
-              personas={personas}
-              selectedPersonaIds={selectedPersonaIds}
               isStreaming={
                 isStreaming && isLastAssistant
               }

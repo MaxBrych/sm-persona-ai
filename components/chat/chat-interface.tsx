@@ -28,6 +28,7 @@ export function ChatInterface({ chatId }: { chatId: string | null }) {
     text: string;
     filePreviews: string[];
   } | null>(null);
+  const [designImageUrl, setDesignImageUrl] = useState<string | null>(null);
 
   // Generate a unique session ID for each "new chat" to avoid stale useChat cache
   const [newSessionId, setNewSessionId] = useState(() => crypto.randomUUID());
@@ -94,6 +95,7 @@ export function ChatInterface({ chatId }: { chatId: string | null }) {
 
     if (!activeChatId) {
       setMessages([]);
+      setDesignImageUrl(null);
       // Generate a fresh session ID so useChat starts with empty message cache
       setNewSessionId(crypto.randomUUID());
       return;
@@ -116,8 +118,31 @@ export function ChatInterface({ chatId }: { chatId: string | null }) {
           createdAt: new Date(m.created_at),
         }));
         setMessages(uiMessages);
+
+        // Detect design images from existing messages for Design Review Mode
+        const firstImageMsg = messagesData.find(
+          (m) =>
+            m.role === "user" &&
+            Array.isArray(m.parts) &&
+            m.parts.some(
+              (p: { type?: string; mediaType?: string }) =>
+                p.type === "file" && p.mediaType?.startsWith("image/")
+            )
+        );
+        if (firstImageMsg && Array.isArray(firstImageMsg.parts)) {
+          const imgPart = firstImageMsg.parts.find(
+            (p: { type?: string; mediaType?: string }) =>
+              p.type === "file" && p.mediaType?.startsWith("image/")
+          ) as { url?: string } | undefined;
+          if (imgPart?.url) {
+            setDesignImageUrl(imgPart.url);
+          }
+        } else {
+          setDesignImageUrl(null);
+        }
       } else {
         setMessages([]);
+        setDesignImageUrl(null);
       }
 
       // Restore personas from chat record (needed for direct URL access)
@@ -248,13 +273,31 @@ export function ChatInterface({ chatId }: { chatId: string | null }) {
     [activeChatId, selectedModel, selectedPersonaIds, sendMessage, setHasUnseenChat, bumpChatListVersion]
   );
 
+  const activePersonas = personas.filter((p) => selectedPersonaIds.includes(p.id));
+
   return (
     <div className="flex h-full flex-col">
       <ChatHeader />
       <div className="flex-1 overflow-hidden">
-        <MessageList messages={messages} status={status} personas={personas} loading={personasLoading} onRegenerate={regenerate} activeChatId={activeChatId} optimisticMessage={optimisticMessage} />
+        <MessageList
+          messages={messages}
+          status={status}
+          personas={personas}
+          loading={personasLoading}
+          onRegenerate={regenerate}
+          activeChatId={activeChatId}
+          optimisticMessage={optimisticMessage}
+          designImageUrl={designImageUrl}
+          activePersonas={activePersonas}
+        />
       </div>
-      <ChatInput onSend={handleSend} status={status} onStop={stop} />
+      <ChatInput
+        onSend={handleSend}
+        status={status}
+        onStop={stop}
+        onImageAttach={(_file, previewUrl) => setDesignImageUrl(previewUrl)}
+        onImageRemove={() => setDesignImageUrl(null)}
+      />
     </div>
   );
 }
