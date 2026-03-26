@@ -114,7 +114,7 @@ export function DesignReviewWrapper({
       {/* Sticky Header Bar (48px) */}
       <div
         className={cn(
-          "fixed top-0 left-0 right-0 z-50 h-12 border-b border-border bg-background/95 backdrop-blur-sm transition-all duration-300 flex items-center px-4 gap-3",
+          "sticky top-0 z-50 h-12 border-b border-border bg-background/95 backdrop-blur-sm transition-all duration-300 flex items-center px-4 gap-3",
           showStickyHeader
             ? "opacity-100 translate-y-0"
             : "opacity-0 -translate-y-full pointer-events-none"
