@@ -108,6 +108,39 @@ export function DesignReviewWrapper({
     setTranslate({ x: 0, y: 0 });
   }, []);
 
+  // Resizable discussion panel state
+  const [panelWidth, setPanelWidth] = useState(380);
+  const isResizing = useRef(false);
+  const resizeStartX = useRef(0);
+  const resizeStartWidth = useRef(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const handleResizeStart = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    isResizing.current = true;
+    resizeStartX.current = e.clientX;
+    resizeStartWidth.current = panelWidth;
+
+    const handleResizeMove = (moveEvent: MouseEvent) => {
+      if (!isResizing.current) return;
+      const delta = resizeStartX.current - moveEvent.clientX;
+      const containerWidth = containerRef.current?.offsetWidth ?? 1000;
+      const maxWidth = containerWidth * 0.6;
+      const newWidth = Math.min(Math.max(resizeStartWidth.current + delta, 250), maxWidth);
+      setPanelWidth(newWidth);
+    };
+
+    const handleResizeEnd = () => {
+      isResizing.current = false;
+      document.removeEventListener("mousemove", handleResizeMove);
+      document.removeEventListener("mouseup", handleResizeEnd);
+    };
+
+    document.addEventListener("mousemove", handleResizeMove);
+    document.addEventListener("mouseup", handleResizeEnd);
+  }, [panelWidth]);
+
   // Strip blockquote markers from voice markdown for plain text rendering
   const cleanVoiceText = (markdown: string) => {
     return markdown.replace(/^>\s*/gm, "").trim();
@@ -183,73 +216,81 @@ export function DesignReviewWrapper({
         </button>
       </div>
 
-      {/* Split Canvas Wrapper */}
+      {/* Full-width Canvas with overlaid Discussion Panel */}
       <div ref={wrapperRef} className="border-b-2 border-border">
         <div
-          className="flex flex-col md:flex-row"
+          ref={containerRef}
+          className="relative"
           style={{ height: "clamp(300px, 50vh, 500px)" }}
         >
-          {/* Left: Zoomable Design Canvas with multiple images */}
-          <div className="flex-1 min-w-0 border-r border-border flex flex-col">
+          {/* Full-width Zoomable Design Canvas */}
+          <div
+            ref={canvasRef}
+            className={cn(
+              "absolute inset-0 overflow-hidden cursor-grab",
+              isPanning && "cursor-grabbing"
+            )}
+            style={{
+              backgroundColor: "#f5f5f5",
+              backgroundImage:
+                "radial-gradient(circle, #d0d0d0 1px, transparent 1px)",
+              backgroundSize: "20px 20px",
+            }}
+            onWheel={handleWheel}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
+            onDoubleClick={handleDoubleClick}
+          >
             <div
-              ref={canvasRef}
-              className={cn(
-                "flex-1 relative overflow-hidden cursor-grab",
-                isPanning && "cursor-grabbing"
-              )}
+              className="w-full h-full flex items-center justify-center gap-4 p-4 transition-transform"
               style={{
-                backgroundColor: "#f5f5f5",
-                backgroundImage:
-                  "radial-gradient(circle, #d0d0d0 1px, transparent 1px)",
-                backgroundSize: "20px 20px",
+                transform: `translate(${translate.x}px, ${translate.y}px) scale(${scale})`,
+                transitionDuration: isPanning ? "0ms" : "150ms",
               }}
-              onWheel={handleWheel}
-              onMouseDown={handleMouseDown}
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleMouseUp}
-              onMouseLeave={handleMouseUp}
-              onDoubleClick={handleDoubleClick}
             >
-              <div
-                className="w-full h-full flex items-center justify-center gap-4 p-4 transition-transform"
-                style={{
-                  transform: `translate(${translate.x}px, ${translate.y}px) scale(${scale})`,
-                  transitionDuration: isPanning ? "0ms" : "150ms",
-                }}
-              >
-                {imageUrls.map((url, i) => (
-                  <div key={url} className="relative flex-shrink-0">
-                    {!loadedImages.has(i) && (
-                      <Skeleton className="h-[90%] w-48 rounded-lg absolute inset-0" />
+              {imageUrls.map((url, i) => (
+                <div key={url} className="relative flex-shrink-0">
+                  {!loadedImages.has(i) && (
+                    <Skeleton className="h-[90%] w-48 rounded-lg absolute inset-0" />
+                  )}
+                  <img
+                    src={url}
+                    alt={`Design ${i + 1}`}
+                    className={cn(
+                      "max-h-[calc(100%-2rem)] object-contain rounded-lg shadow-2xl transition-opacity duration-300 select-none",
+                      loadedImages.has(i) ? "opacity-100" : "opacity-0"
                     )}
-                    <img
-                      src={url}
-                      alt={`Design ${i + 1}`}
-                      className={cn(
-                        "max-h-[calc(100%-2rem)] object-contain rounded-lg shadow-2xl transition-opacity duration-300 select-none",
-                        loadedImages.has(i) ? "opacity-100" : "opacity-0"
-                      )}
-                      style={{
-                        maxHeight: "clamp(260px, 45vh, 460px)",
-                      }}
-                      onLoad={() => onImageLoad(i)}
-                      draggable={false}
-                    />
-                  </div>
-                ))}
-              </div>
-
-              {/* Zoom indicator */}
-              {scale !== 1 && (
-                <div className="absolute bottom-2 left-2 text-[10px] text-muted-foreground bg-background/80 px-2 py-0.5 rounded backdrop-blur-sm">
-                  {Math.round(scale * 100)}% · doppelklick zum zurücksetzen
+                    style={{
+                      maxHeight: "clamp(260px, 45vh, 460px)",
+                    }}
+                    onLoad={() => onImageLoad(i)}
+                    draggable={false}
+                  />
                 </div>
-              )}
+              ))}
             </div>
+
+            {/* Zoom indicator */}
+            {scale !== 1 && (
+              <div className="absolute bottom-2 left-2 text-[10px] text-muted-foreground bg-background/80 px-2 py-0.5 rounded backdrop-blur-sm">
+                {Math.round(scale * 100)}% · doppelklick zum zurücksetzen
+              </div>
+            )}
           </div>
 
-          {/* Right: Persona Voices as chat comments */}
-          <div className="flex-1 min-w-0 min-h-0 flex flex-col bg-background md:max-w-[50%] overflow-hidden">
+          {/* Overlaid Discussion Panel */}
+          <div
+            className="absolute top-3 right-3 bottom-3 flex flex-col bg-background/95 backdrop-blur-sm rounded-xl border border-border shadow-lg overflow-hidden"
+            style={{ width: panelWidth }}
+          >
+            {/* Resize handle (left edge) */}
+            <div
+              className="absolute left-0 top-0 bottom-0 w-1.5 cursor-col-resize hover:bg-primary/20 active:bg-primary/30 transition-colors z-10"
+              onMouseDown={handleResizeStart}
+            />
+
             <div className="px-3 py-2 border-b border-border">
               <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-medium">
                 Stimmen vom Tisch

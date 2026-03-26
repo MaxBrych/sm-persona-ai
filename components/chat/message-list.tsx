@@ -10,6 +10,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Loader2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAppStore } from "@/hooks/use-app-store";
+import { cn } from "@/lib/utils";
 import type { Persona } from "@/lib/types";
 
 export function MessageList({
@@ -35,9 +36,14 @@ export function MessageList({
 }) {
   const { selectedPersonaIds } = useAppStore();
   const bottomRef = useRef<HTMLDivElement>(null);
+  const hasInitiallyLoaded = useRef(false);
 
+  // Only auto-scroll when actively streaming or submitting, not on initial load
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (status === "streaming" || status === "submitted" || optimisticMessage) {
+      hasInitiallyLoaded.current = true;
+      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
   }, [messages, status, optimisticMessage]);
 
   const isStreaming = status === "streaming";
@@ -96,7 +102,7 @@ export function MessageList({
           aiResponseText={lastAssistantText || undefined}
         />
       )}
-      <div className="mx-auto max-w-3xl py-4">
+      <div className={cn("mx-auto max-w-3xl", inDesignReview ? "pb-4" : "py-4")}>
         {messages.map((message, index) => {
           const isLastAssistant =
             message.role === "assistant" &&
